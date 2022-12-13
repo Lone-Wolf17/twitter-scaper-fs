@@ -1,7 +1,18 @@
-import prismaClient from "../services/database";
-import { twitterClient } from "../services/twitter";
+require("dotenv").config();
+const { parentPort } = require("worker_threads");
+const { PrismaClient } = require("@prisma/client");
+const { TwitterApi } = require("twitter-api-v2");
+const cron = require("node-cron");
 
-const scrape_tweets = async () => {
+const prismaClient = new PrismaClient();
+let twitterClient = new TwitterApi({
+  appKey: process.env.TWITTER_API_KEY,
+  appSecret: process.env.TWITTER_API_SECRET,
+  accessToken: process.env.TWITTER_API_TOKEN,
+  accessSecret: process.env.TWITTER_API_TOKEN_SECRET,
+});
+
+cron.schedule("0/15 * * * * *", async () => {
   try {
     let tweetCount = 0;
     const topics = await prismaClient.topic.findMany({
@@ -27,9 +38,10 @@ const scrape_tweets = async () => {
     console.log(
       `Successfully scraped tweets for ${topics.length} topics -> ${tweetCount} tweets`
     );
+    parentPort?.postMessage(
+      `Successfully scraped tweets for ${topics.length} topics -> ${tweetCount} tweets`
+    );
   } catch (error) {
     console.error(error);
   }
-};
-
-export default scrape_tweets;
+});

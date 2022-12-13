@@ -1,10 +1,18 @@
 require("dotenv").config();
 import express from "express";
-import cron from "node-cron";
+import { Worker } from "worker_threads";
 import topicsRouter from "./controllers/topics";
-import scrape_tweets from "./workers/scrape_tweets";
 
-// cron.schedule("0/15 * * * * *", scrape_tweets);
+const worker = new Worker("./src/workers/scrape_tweets.ts");
+worker.on("online", () => {
+  console.log("Successfully started worker for tweet scraper every 15 seconds");
+});
+worker.on("error", (e) => {
+  console.log(e);
+});
+worker.on("exit", () => {
+  console.log("Successfully ended worker for tweet scraper every 15 seconds");
+});
 
 (async () => {
   try {
