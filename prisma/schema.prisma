@@ -2,7 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -23,10 +24,12 @@ model Topic {
 }
 
 model Tweet {
-  tweetId String @id
-  text    String
-  topic   Topic  @relation(fields: [topicId], references: [id])
-  topicId String
+  tweetId   String   @id
+  text      String
+  topic     Topic    @relation(fields: [topicId], references: [id])
+  topicId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@map("tweets")
 }

@@ -13,7 +13,12 @@ const scrape_tweets = async () => {
       tweetCount = tweets.data.length;
       await prismaClient.tweet.createMany({
         data: tweets.data.map((v) => {
-          return { tweetId: v.id, text: v.text, topicId: topic.id };
+          return {
+            tweetId: v.id,
+            text: v.text,
+            topicId: topic.id,
+            createdAt: v.created_at,
+          };
         }),
         skipDuplicates: true,
       });

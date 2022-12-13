@@ -11,6 +11,11 @@ type ListTopicParams = {
 type GetByTopicIDParams = {
   topicID?: string;
   page?: number;
+  startTime?: string;
+  endTime?: string;
+  query?: string;
+  text?: string;
+  orderBy?: "asc" | "desc";
 };
 
 export { CreateTopicsBody, ListTopicParams, GetByTopicIDParams };

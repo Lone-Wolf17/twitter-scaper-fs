@@ -4,7 +4,7 @@ import cron from "node-cron";
 import topicsRouter from "./controllers/topics";
 import scrape_tweets from "./workers/scrape_tweets";
 
-//cron.schedule("0/15 * * * * *", scrape_tweets);
+// cron.schedule("0/15 * * * * *", scrape_tweets);
 
 (async () => {
   try {

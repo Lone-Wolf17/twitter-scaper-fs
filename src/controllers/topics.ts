@@ -1,6 +1,6 @@
+import { Prisma } from "@prisma/client";
 import express, { Request, Response } from "express";
 import slugify from "slugify";
-import { createPaginator } from "prisma-pagination";
 
 import prismaClient from "../services/database";
 import {
@@ -59,23 +59,59 @@ router.get(
 );
 
 router.get(
-  "/:topicID",
-  async (request: Request<GetByTopicIDParams>, response: Response) => {
+  "/tweets",
+  async (
+    request: Request<GetByTopicIDParams, GetByTopicIDParams>,
+    response: Response
+  ) => {
     try {
       let [result, count] = await prismaClient.$transaction([
         prismaClient.tweet.findMany({
-          where: { topicId: request.params.topicID },
+          where: {
+            topicId: request.query.topicID! as string,
+            createdAt: {
+              lte: request.query.endTime
+                ? new Date(request.query.endTime as string)
+                : undefined,
+              gte: request.query.startTime
+                ? new Date(request.query.startTime as string)
+                : undefined,
+            },
+            text: {
+              search: request.query.query
+                ? `${(request.query.query as string).split(" ").join(" & ")}`
+                : undefined,
+            },
+          },
+          orderBy: { createdAt: request.query.orderBy as Prisma.SortOrder },
         }),
         prismaClient.tweet.count({
-          where: { topicId: request.params.topicID },
+          where: {
+            topicId: request.query.topicID! as string,
+            createdAt: {
+              lte: request.query.endTime
+                ? new Date(request.query.endTime as string)
+                : undefined,
+              gte: request.query.startTime
+                ? new Date(request.query.startTime as string)
+                : undefined,
+            },
+            text: {
+              search: request.query.query
+                ? `${(request.query.query as string).split(" ").join(" & ")}`
+                : undefined,
+            },
+          },
         }),
       ]);
+
       response.status(200).json({
         success: true,
         tweets: result,
         count: count,
       });
     } catch (error) {
+      console.log(error);
       response.status(500).json({
         success: false,
         message: "Something went wrong",
