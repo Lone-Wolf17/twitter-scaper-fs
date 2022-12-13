@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+  web:
+    build:
+      context: .
+    image: twitter-api:1.0.0
+    container_name: twitter_api
+    ports:
+      - "3000:3000"
+    environment:
+      - "DATABASE_URL=${DATABASE_URL}"
+      - "TWITTER_API_KEY=${TWITTER_API_KEY}"
+      - "TWITTER_API_SECRET=${TWITTER_API_SECRET}"
+      - "TWITTER_API_APP=${TWITTER_API_APP}"
+      - "TWITTER_API_TOKEN=${TWITTER_API_TOKEN}"
+      - "TWITTER_API_TOKEN_SECRET=${TWITTER_API_TOKEN_SECRET}"
+      - "TWITTER_API_BEARER=${TWITTER_API_BEARER}"
+      - "NODE_ENV=development"
+      - "PORT=3000"
+    restart: unless-stopped
+    volumes:
+      - .:/app/
+      - /app/node_modules
+    depends_on:
+      - postgres
+  postgres:
+    image: postgres:14.6
+    restart: always
+    container_name: twitter_api_db
+    environment:
+      - POSTGRES_USER=jaaouani
+      - POSTGRES_PASSWORD=jaaouani
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+volumes:
+  postgres:
