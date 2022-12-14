@@ -6,8 +6,8 @@ RUN yarn install --pure-lockfile
 COPY . .
 
 RUN chown -R node:node /app
-RUN yarn build
-USER node
+RUN chmod +x /app/entrypoint.sh
 
 EXPOSE 3000
-CMD yarn start
+ENTRYPOINT [ "./entrypoint.sh" ]
+CMD [ "yarn", "start" ]
