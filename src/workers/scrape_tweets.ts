@@ -28,7 +28,7 @@ cron.schedule("0/15 * * * * *", async () => {
             tweetId: v.id,
             text: v.text,
             topicId: topic.id,
-            createdAt: v.created_at,
+            createdAt: new Date(v.created_at),
           };
         }),
         skipDuplicates: true,
