@@ -28,7 +28,7 @@ model Tweet {
   text      String
   topic     Topic    @relation(fields: [topicId], references: [id])
   topicId   String
-  createdAt DateTime @default(now())
+  createdAt DateTime
   updatedAt DateTime @default(now()) @updatedAt
 
   @@map("tweets")
