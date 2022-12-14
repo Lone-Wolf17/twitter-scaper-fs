@@ -38,9 +38,7 @@ cron.schedule("0/15 * * * * *", async () => {
     console.log(
       `Successfully scraped tweets for ${topics.length} topics -> ${tweetCount} tweets`
     );
-    parentPort?.postMessage(
-      `Successfully scraped tweets for ${topics.length} topics -> ${tweetCount} tweets`
-    );
+    parentPort?.postMessage();
   } catch (error) {
     console.error(error);
   }

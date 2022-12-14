@@ -111,7 +111,6 @@ router.get(
         count: count,
       });
     } catch (error) {
-      console.log(error);
       response.status(500).json({
         success: false,
         message: "Something went wrong",
