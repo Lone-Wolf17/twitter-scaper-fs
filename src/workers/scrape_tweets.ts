@@ -20,7 +20,12 @@ cron.schedule("0/15 * * * * *", async () => {
     });
 
     for (let topic of topics) {
-      const tweets = (await twitterClient.v2.search(topic.slug)).data;
+      const tweets = (
+        await twitterClient.v2.search(topic.slug, {
+          "tweet.fields": "created_at",
+        })
+      ).data;
+      console.log(tweets);
       tweetCount = tweets.data.length;
       await prismaClient.tweet.createMany({
         data: tweets.data.map((v) => {
@@ -28,7 +33,7 @@ cron.schedule("0/15 * * * * *", async () => {
             tweetId: v.id,
             text: v.text,
             topicId: topic.id,
-            createdAt: new Date(v.created_at),
+            createdAt: new Date(),
           };
         }),
         skipDuplicates: true,
