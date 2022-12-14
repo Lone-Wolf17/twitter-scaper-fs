@@ -25,7 +25,7 @@ cron.schedule("0/15 * * * * *", async () => {
           "tweet.fields": "created_at",
         })
       ).data;
-      console.log(tweets);
+
       tweetCount = tweets.data.length;
       await prismaClient.tweet.createMany({
         data: tweets.data.map((v) => {
