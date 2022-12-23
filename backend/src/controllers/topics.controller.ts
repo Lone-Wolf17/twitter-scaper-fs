@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
-import TopicService from "../services/topics.service";
+import TopicsService from "../services/topics.service";
 
 import {
   CreateTopicsBody,
   GetByTopicIDParams,
   ListTopicParams,
+  UpdateTopicBody,
 } from "./topics.dto";
 
 export const createTopic = async (
@@ -12,7 +13,7 @@ export const createTopic = async (
   response: Response
 ) => {
   try {
-    await TopicService.createTopic(request.body);
+    await TopicsService.createTopic(request.body);
     response.status(200).json({
       success: true,
       message: "Topic created successfully",
@@ -32,7 +33,7 @@ export const fetchAllTopics = async (
   response: Response
 ) => {
   try {
-    const topics = await TopicService.fetchAll(request.params);
+    const topics = await TopicsService.fetchAll(request.params);
 
     response.status(200).json({
       success: true,
@@ -60,7 +61,7 @@ export const fetchTweets = async (
       });
     }
 
-    let [result, count] = await TopicService.fetchTweets(request.query);
+    let [result, count] = await TopicsService.fetchTweets(request.query);
 
     response.status(200).json({
       success: true,
@@ -72,6 +73,25 @@ export const fetchTweets = async (
       success: false,
       message: "Something went wrong",
       code: "TOPIC_RETRIEVAL_FAILURE",
+    });
+  }
+};
+
+export const updateTopic = async (
+  request: Request<{ id: string }, any, UpdateTopicBody>,
+  response: Response
+) => {
+  try {
+    await TopicsService.updateTopic(request.params.id, request.body);
+    response.status(200).json({
+      success: true,
+      message: "Topic updated successfully",
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      code: "TOPIC_UPDATE_FAILURE",
     });
   }
 };

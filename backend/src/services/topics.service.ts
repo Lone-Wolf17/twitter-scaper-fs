@@ -2,6 +2,7 @@ import {
   CreateTopicsBody,
   GetByTopicIDParams,
   ListTopicParams,
+  UpdateTopicBody,
 } from "../controllers/topics.dto";
 import { Prisma } from "@prisma/client";
 import prismaClient from "./database";
@@ -64,8 +65,23 @@ const fetchTweets = async ({
   ]);
 };
 
+const updateTopic = async (
+  id: string,
+  { name, description }: UpdateTopicBody
+) => {
+  return await prismaClient.topic.update({
+    where: { id },
+    data: {
+      name,
+      description,
+      slug: slugify(name, { replacement: "_" }),
+    },
+  });
+};
+
 export default {
   createTopic,
   fetchAll,
   fetchTweets,
+  updateTopic,
 };

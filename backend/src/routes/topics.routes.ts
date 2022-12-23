@@ -23,4 +23,6 @@ router.get(
   TopicsController.fetchTweets
 );
 
+router.put("/:id", validate(createTopicSchema), TopicsController.updateTopic);
+
 export default router;

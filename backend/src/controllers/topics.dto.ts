@@ -3,6 +3,8 @@ type CreateTopicsBody = {
   description: string;
 };
 
+type UpdateTopicBody = CreateTopicsBody;
+
 type ListTopicParams = {
   take?: number;
   skip?: number;
@@ -16,4 +18,9 @@ type GetByTopicIDParams = {
   orderBy?: "asc" | "desc";
 };
 
-export { CreateTopicsBody, ListTopicParams, GetByTopicIDParams };
+export {
+  CreateTopicsBody,
+  ListTopicParams,
+  GetByTopicIDParams,
+  UpdateTopicBody,
+};
