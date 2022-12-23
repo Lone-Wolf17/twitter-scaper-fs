@@ -6,8 +6,8 @@ type CreateTopicsBody = {
 type UpdateTopicBody = CreateTopicsBody;
 
 type ListTopicParams = {
-  take?: number;
-  skip?: number;
+  limit?: number;
+  page?: number;
 };
 
 type GetByTopicIDParams = {

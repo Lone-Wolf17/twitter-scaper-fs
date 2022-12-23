@@ -1,9 +1,6 @@
 import { Router } from "express";
 
-import {
-  createTopicSchema,
-  searchTweetsSchema,
-} from "../schemas/topics.schema";
+import { createTopicSchema, fetchTweetsSchema } from "../schemas/topics.schema";
 import { validate } from "../middlewares/validate";
 import * as TopicsController from "../controllers/topics.controller";
 
@@ -19,7 +16,7 @@ router.get("/all", TopicsController.fetchAllTopics);
 
 router.get(
   "/tweets",
-  validate(searchTweetsSchema),
+  validate(fetchTweetsSchema),
   TopicsController.fetchTweets
 );
 

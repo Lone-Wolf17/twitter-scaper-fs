@@ -7,6 +7,7 @@ import {
 import { Prisma } from "@prisma/client";
 import prismaClient from "./database";
 import slugify from "slugify";
+import { FetchTweetsInput } from "@app/schemas/topics.schema";
 
 const createTopic = async (input: CreateTopicsBody) => {
   return await prismaClient.topic.create({
@@ -18,11 +19,17 @@ const createTopic = async (input: CreateTopicsBody) => {
   });
 };
 
-const fetchAll = async (input: ListTopicParams) => {
-  return prismaClient.topic.findMany({
-    take: input.take ?? 100,
-    skip: input.skip ?? 0,
-  });
+const fetchAllTopics = async (input: ListTopicParams) => {
+  const result_per_page = input.limit ? Number(input.limit) : 100;
+  const current_page = input.page ? Number(input.page) : 1;
+
+  return prismaClient.$transaction([
+    prismaClient.topic.findMany({
+      take: result_per_page,
+      skip: (current_page - 1) * result_per_page,
+    }),
+    prismaClient.topic.count({}),
+  ]);
 };
 
 const fetchTweets = async ({
@@ -31,7 +38,9 @@ const fetchTweets = async ({
   endTime,
   query,
   orderBy,
-}: GetByTopicIDParams) => {
+  limit,
+  page,
+}: FetchTweetsInput) => {
   let finalEndTime: Date;
   if (endTime) {
     finalEndTime = new Date(endTime);
@@ -48,16 +57,19 @@ const fetchTweets = async ({
       gte: startTime ? new Date(startTime) : undefined,
     },
     text: {
-      search: query
-        ? `${(query as string).split(" ").join(" & ")}`
-        : undefined,
+      search: query ? `${(query as string).split(" ").join(" & ")}` : undefined,
     },
   };
+
+  const result_per_page = limit ? Number(limit) : 50;
+  const current_page = page ? Number(page) : 1;
 
   return prismaClient.$transaction([
     prismaClient.tweet.findMany({
       where: whereQuery,
       orderBy: { createdAt: orderBy as Prisma.SortOrder },
+      take: result_per_page,
+      skip: (current_page - 1) * result_per_page,
     }),
     prismaClient.tweet.count({
       where: whereQuery,
@@ -87,7 +99,7 @@ const removeTopic = async (id: string) => {
 
 export default {
   createTopic,
-  fetchAll,
+  fetchAllTopics: fetchAllTopics,
   fetchTweets,
   updateTopic,
   removeTopic,

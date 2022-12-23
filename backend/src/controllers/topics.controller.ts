@@ -1,3 +1,5 @@
+import { FetchTopicsInput, FetchTweetsInput } from "../schemas/topics.schema";
+import { paginateResult } from "../utils";
 import { Request, Response } from "express";
 import TopicsService from "../services/topics.service";
 
@@ -29,14 +31,19 @@ export const createTopic = async (
 };
 
 export const fetchAllTopics = async (
-  request: Request<ListTopicParams>,
+  request: Request<any, any, any, FetchTopicsInput>,
   response: Response
 ) => {
   try {
-    const topics = await TopicsService.fetchAll(request.params);
+    const [topics, count] = await TopicsService.fetchAllTopics(request.query);
 
     response.status(200).json({
       success: true,
+      ...paginateResult({
+        current_page: request.query.page,
+        limit: request.query.limit,
+        item_count: count,
+      }),
       topics: topics,
     });
   } catch (error) {
@@ -49,7 +56,7 @@ export const fetchAllTopics = async (
 };
 
 export const fetchTweets = async (
-  request: Request<any, any, any, any, GetByTopicIDParams>,
+  request: Request<any, any, any, FetchTweetsInput>,
   response: Response
 ) => {
   try {
@@ -65,6 +72,11 @@ export const fetchTweets = async (
 
     response.status(200).json({
       success: true,
+      ...paginateResult({
+        current_page: request.query.page,
+        limit: request.query.limit,
+        item_count: count,
+      }),
       tweets: result,
       count: count,
     });
