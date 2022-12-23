@@ -25,4 +25,6 @@ router.get(
 
 router.put("/:id", validate(createTopicSchema), TopicsController.updateTopic);
 
+router.delete("/:id", TopicsController.deleteTopic);
+
 export default router;

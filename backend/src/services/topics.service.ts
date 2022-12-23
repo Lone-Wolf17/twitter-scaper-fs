@@ -79,9 +79,16 @@ const updateTopic = async (
   });
 };
 
+const removeTopic = async (id: string) => {
+  return await prismaClient.topic.delete({
+    where: { id },
+  });
+};
+
 export default {
   createTopic,
   fetchAll,
   fetchTweets,
   updateTopic,
+  removeTopic,
 };

@@ -95,3 +95,22 @@ export const updateTopic = async (
     });
   }
 };
+
+export const deleteTopic = async (
+  request: Request<{ id: string }>,
+  response: Response
+) => {
+  try {
+    await TopicsService.removeTopic(request.params.id);
+    response.status(200).json({
+      success: true,
+      message: "Topic deleted successfully",
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      code: "TOPIC_DELETION_FAILURE",
+    });
+  }
+};

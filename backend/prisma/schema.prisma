@@ -26,7 +26,7 @@ model Topic {
 model Tweet {
   tweetId   String   @id
   text      String
-  topic     Topic    @relation(fields: [topicId], references: [id])
+  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
   topicId   String
   createdAt DateTime
   updatedAt DateTime @default(now()) @updatedAt
