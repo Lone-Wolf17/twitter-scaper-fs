@@ -24,40 +24,42 @@ const fetchAll = async (input: ListTopicParams) => {
   });
 };
 
-const fetchTweets = async (input: GetByTopicIDParams) => {
+const fetchTweets = async ({
+  topicID,
+  startTime,
+  endTime,
+  query,
+  orderBy,
+}: GetByTopicIDParams) => {
+  let finalEndTime: Date;
+  if (endTime) {
+    finalEndTime = new Date(endTime);
+    // we do this ensure that the endTime actually returns tweets from today.
+    // when given a date string, JS create a string with the time set to 00:00:00
+    // this eliminates tweets from the current date.
+    finalEndTime.setHours(23, 59, 59);
+  }
+
+  const whereQuery = {
+    topicId: topicID! as string,
+    createdAt: {
+      lte: endTime ? finalEndTime! : undefined,
+      gte: startTime ? new Date(startTime) : undefined,
+    },
+    text: {
+      search: query
+        ? `${(query as string).split(" ").join(" & ")}`
+        : undefined,
+    },
+  };
+
   return prismaClient.$transaction([
     prismaClient.tweet.findMany({
-      where: {
-        topicId: input.topicID! as string,
-        createdAt: {
-          lte: input.endTime ? new Date(input.endTime as string) : undefined,
-          gte: input.startTime
-            ? new Date(input.startTime as string)
-            : undefined,
-        },
-        text: {
-          search: input.query
-            ? `${(input.query as string).split(" ").join(" & ")}`
-            : undefined,
-        },
-      },
-      orderBy: { createdAt: input.orderBy as Prisma.SortOrder },
+      where: whereQuery,
+      orderBy: { createdAt: orderBy as Prisma.SortOrder },
     }),
     prismaClient.tweet.count({
-      where: {
-        topicId: input.topicID! as string,
-        createdAt: {
-          lte: input.endTime ? new Date(input.endTime as string) : undefined,
-          gte: input.startTime
-            ? new Date(input.startTime as string)
-            : undefined,
-        },
-        text: {
-          search: input.query
-            ? `${(input.query as string).split(" ").join(" & ")}`
-            : undefined,
-        },
-      },
+      where: whereQuery,
     }),
   ]);
 };

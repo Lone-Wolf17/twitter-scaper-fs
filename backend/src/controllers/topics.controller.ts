@@ -1,14 +1,13 @@
 import { Request, Response } from "express";
 import TopicService from "../services/topics.service";
 
-
 import {
   CreateTopicsBody,
   GetByTopicIDParams,
   ListTopicParams,
 } from "./topics.dto";
 
-export const createPost = async (
+export const createTopic = async (
   request: Request<any, any, CreateTopicsBody>,
   response: Response
 ) => {
@@ -28,7 +27,7 @@ export const createPost = async (
   }
 };
 
-export const fetchAllPosts = async (
+export const fetchAllTopics = async (
   request: Request<ListTopicParams>,
   response: Response
 ) => {
@@ -53,6 +52,14 @@ export const fetchTweets = async (
   response: Response
 ) => {
   try {
+    if (!request.query.topicID) {
+      return response.status(400).json({
+        success: false,
+        message: "topicID is required",
+        code: "TOPIC_RETRIEVAL_FAILURE",
+      });
+    }
+
     let [result, count] = await TopicService.fetchTweets(request.query);
 
     response.status(200).json({
