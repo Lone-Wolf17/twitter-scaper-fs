@@ -1,10 +1,10 @@
 version: "3.8"
 services:
-  web:
+  backend:
     build:
       context: .
     ports:
-      - "3000:3000"
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
     environment:
       - "DATABASE_URL=${DATABASE_URL}"
       - "TWITTER_API_KEY=${TWITTER_API_KEY}"
@@ -13,32 +13,32 @@ services:
       - "TWITTER_API_TOKEN=${TWITTER_API_TOKEN}"
       - "TWITTER_API_TOKEN_SECRET=${TWITTER_API_TOKEN_SECRET}"
       - "TWITTER_API_BEARER=${TWITTER_API_BEARER}"
-      - "NODE_ENV=development"
-      - "PORT=3000"
+      - "NODE_ENV=${NODE_ENV}"
+      - "PORT=${BACKEND_PORT}"
     restart: unless-stopped
     volumes:
       - .:/app/
-      - /app/node_modules
+      - /app/backend/node_modules
     depends_on:
       - postgres
     links:
       - postgres
     networks:
-      - my-network
+      - backend
   postgres:
     image: postgres:14.6
     container_name: postgres
     restart: always
     environment:
-      - POSTGRES_USER=jaaouani
-      - POSTGRES_PASSWORD=jaaouani
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
-      - my-network
+      - backend
 volumes:
   postgres:
 networks:
-  my-network:
+  backend:
