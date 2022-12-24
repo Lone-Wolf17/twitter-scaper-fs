@@ -7,7 +7,10 @@ import {
 import { Prisma } from "@prisma/client";
 import prismaClient from "./database";
 import slugify from "slugify";
-import { FetchTweetsInput } from "@app/schemas/topics.schema";
+import {
+  FetchTweetsInput,
+  SetBookmarkTweetInput,
+} from "../schemas/topics.schema";
 
 const createTopic = async (input: CreateTopicsBody) => {
   return await prismaClient.topic.create({
@@ -40,6 +43,7 @@ const fetchTweets = async ({
   orderBy,
   limit,
   page,
+  bookmarked,
 }: FetchTweetsInput) => {
   let finalEndTime: Date;
   if (endTime) {
@@ -50,7 +54,7 @@ const fetchTweets = async ({
     finalEndTime.setHours(23, 59, 59);
   }
 
-  const whereQuery = {
+  const whereQuery: Prisma.TweetWhereInput = {
     topicId: topicID! as string,
     createdAt: {
       lte: endTime ? finalEndTime! : undefined,
@@ -59,6 +63,7 @@ const fetchTweets = async ({
     text: {
       search: query ? `${(query as string).split(" ").join(" & ")}` : undefined,
     },
+    bookmarked: bookmarked ? Boolean(bookmarked) : undefined,
   };
 
   const result_per_page = limit ? Number(limit) : 50;
@@ -97,10 +102,23 @@ const removeTopic = async (id: string) => {
   });
 };
 
+const setTweetBookmarkStatus = async ({
+  tweetId,
+  bookmarked,
+}: SetBookmarkTweetInput) => {
+  return await prismaClient.tweet.update({
+    where: { tweetId },
+    data: {
+      bookmarked,
+    },
+  });
+};
+
 export default {
   createTopic,
-  fetchAllTopics: fetchAllTopics,
+  fetchAllTopics,
   fetchTweets,
   updateTopic,
   removeTopic,
+  setTweetBookmarkStatus,
 };

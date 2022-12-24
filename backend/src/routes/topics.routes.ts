@@ -1,6 +1,10 @@
 import { Router } from "express";
 
-import { createTopicSchema, fetchTweetsSchema } from "../schemas/topics.schema";
+import {
+  createTopicSchema,
+  fetchTweetsSchema,
+  setBookmarkTweetSchema,
+} from "../schemas/topics.schema";
 import { validate } from "../middlewares/validate";
 import * as TopicsController from "../controllers/topics.controller";
 
@@ -23,5 +27,11 @@ router.get(
 router.put("/:id", validate(createTopicSchema), TopicsController.updateTopic);
 
 router.delete("/:id", TopicsController.deleteTopic);
+
+router.put(
+  "/tweets/setBookmarkStatus",
+  validate(setBookmarkTweetSchema),
+  TopicsController.setTweetBookmarkStatus
+);
 
 export default router;

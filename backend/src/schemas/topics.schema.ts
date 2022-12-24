@@ -1,4 +1,4 @@
-import { date, object, preprocess, string, TypeOf } from "zod";
+import { boolean, date, object, preprocess, string, TypeOf } from "zod";
 
 const pageNumberSchema = string()
   .refine((s) => {
@@ -22,8 +22,12 @@ const dateSchema = preprocess((arg) => {
 
 export const createTopicSchema = object({
   body: object({
-    name: string({ required_error: "name is required" }),
-    description: string({ required_error: "description is required" }),
+    name: string({ required_error: "name is required" }).min(1, {
+      message: "name cannot be empty",
+    }),
+    description: string({ required_error: "description is required" }).min(1, {
+      message: "descripion cannot be empty",
+    }),
   }),
 });
 
@@ -43,8 +47,26 @@ export const fetchTweetsSchema = object({
     endTime: dateSchema,
     query: string().optional(),
     orderBy: string().optional(),
+    bookmarked: string({ required_error: "bookmarked is required" })
+      .refine(
+        (s) => {
+          return s === "0" || s === "1";
+        },
+        { message: "Allowed values are 0 and 1" }
+      )
+      .transform(Boolean)
+      .optional(),
     page: pageNumberSchema,
     limit: paginationLimitSchema,
+  }),
+});
+
+export const setBookmarkTweetSchema = object({
+  body: object({
+    tweetId: string({ required_error: "tweetId is required" }).min(1, {
+      message: "tweetId cannot be empty",
+    }),
+    bookmarked: boolean({ required_error: "bookmarked is required" }),
   }),
 });
 
@@ -52,3 +74,6 @@ export type CreateTopicInput = TypeOf<typeof createTopicSchema>["body"];
 export type UpdateTopicBody = CreateTopicInput;
 export type FetchTopicsInput = TypeOf<typeof fetchTopicsSchema>["query"];
 export type FetchTweetsInput = TypeOf<typeof fetchTweetsSchema>["query"];
+export type SetBookmarkTweetInput = TypeOf<
+  typeof setBookmarkTweetSchema
+>["body"];

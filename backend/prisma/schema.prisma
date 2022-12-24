@@ -24,12 +24,13 @@ model Topic {
 }
 
 model Tweet {
-  tweetId   String   @id
-  text      String
-  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  topicId   String
-  createdAt DateTime
-  updatedAt DateTime @default(now()) @updatedAt
-
+  tweetId     String   @id
+  text        String
+  topic       Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  topicId     String
+  createdAt   DateTime
+  updatedAt   DateTime @default(now()) @updatedAt
+  bookmarked  Boolean  @default(false)
+  
   @@map("tweets")
 }

@@ -16,6 +16,7 @@ type GetByTopicIDParams = {
   endTime?: string;
   query?: string;
   orderBy?: "asc" | "desc";
+  bookmarked?: boolean;
 };
 
 export {

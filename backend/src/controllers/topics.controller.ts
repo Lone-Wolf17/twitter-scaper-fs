@@ -1,4 +1,8 @@
-import { FetchTopicsInput, FetchTweetsInput } from "../schemas/topics.schema";
+import {
+  FetchTopicsInput,
+  FetchTweetsInput,
+  SetBookmarkTweetInput,
+} from "../schemas/topics.schema";
 import { paginateResult } from "../utils";
 import { Request, Response } from "express";
 import TopicsService from "../services/topics.service";
@@ -55,40 +59,6 @@ export const fetchAllTopics = async (
   }
 };
 
-export const fetchTweets = async (
-  request: Request<any, any, any, FetchTweetsInput>,
-  response: Response
-) => {
-  try {
-    if (!request.query.topicID) {
-      return response.status(400).json({
-        success: false,
-        message: "topicID is required",
-        code: "TOPIC_RETRIEVAL_FAILURE",
-      });
-    }
-
-    let [result, count] = await TopicsService.fetchTweets(request.query);
-
-    response.status(200).json({
-      success: true,
-      ...paginateResult({
-        current_page: request.query.page,
-        limit: request.query.limit,
-        item_count: count,
-      }),
-      tweets: result,
-      count: count,
-    });
-  } catch (error) {
-    response.status(500).json({
-      success: false,
-      message: "Something went wrong",
-      code: "TOPIC_RETRIEVAL_FAILURE",
-    });
-  }
-};
-
 export const updateTopic = async (
   request: Request<{ id: string }, any, UpdateTopicBody>,
   response: Response
@@ -123,6 +93,60 @@ export const deleteTopic = async (
       success: false,
       message: "Something went wrong",
       code: "TOPIC_DELETION_FAILURE",
+    });
+  }
+};
+
+export const fetchTweets = async (
+  request: Request<any, any, any, FetchTweetsInput>,
+  response: Response
+) => {
+  try {
+    if (!request.query.topicID) {
+      return response.status(400).json({
+        success: false,
+        message: "topicID is required",
+        code: "TOPIC_RETRIEVAL_FAILURE",
+      });
+    }
+
+    let [result, count] = await TopicsService.fetchTweets(request.query);
+
+    response.status(200).json({
+      success: true,
+      ...paginateResult({
+        current_page: request.query.page,
+        limit: request.query.limit,
+        item_count: count,
+      }),
+      tweets: result,
+      count: count,
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      code: "TWEETS_RETRIEVAL_FAILURE",
+    });
+  }
+};
+
+export const setTweetBookmarkStatus = async (
+  request: Request<any, any, SetBookmarkTweetInput>,
+  response: Response
+) => {
+  try {
+    let tweet = await TopicsService.setTweetBookmarkStatus(request.body);
+
+    response.status(200).json({
+      success: true,
+      tweet,
+    });
+  } catch (error) {
+    response.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      code: "SET_TWEET_BOOKMARK_STATUS_FAILURE",
     });
   }
 };
