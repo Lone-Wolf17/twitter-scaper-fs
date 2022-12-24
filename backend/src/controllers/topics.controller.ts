@@ -6,6 +6,7 @@ import {
 import { paginateResult } from "../utils";
 import { Request, Response } from "express";
 import TopicsService from "../services/topics.service";
+import { PrismaErrorCodes } from "../constants/prisma-error-codes";
 
 import {
   CreateTopicsBody,
@@ -24,11 +25,14 @@ export const createTopic = async (
       success: true,
       message: "Topic created successfully",
     });
-  } catch (error) {
-    // console.log(error);
+  } catch (error: any) {
+    let message = "Something went wrong";
+    if (error.code && error.code === PrismaErrorCodes.RecordNotFound) {
+      message = "Invalid ID. Topic not found";
+    }
     response.status(500).json({
       success: false,
-      message: "Something went wrong",
+      message,
       code: "TOPIC_CREATION_FAILURE",
     });
   }
@@ -88,10 +92,14 @@ export const deleteTopic = async (
       success: true,
       message: "Topic deleted successfully",
     });
-  } catch (error) {
+  } catch (error: any) {
+    let message = "Something went wrong";
+    if (error.code && error.code === PrismaErrorCodes.RecordNotFound) {
+      message = "Invalid ID. Topic not found";
+    }
     response.status(500).json({
       success: false,
-      message: "Something went wrong",
+      message,
       code: "TOPIC_DELETION_FAILURE",
     });
   }
@@ -142,10 +150,14 @@ export const setTweetBookmarkStatus = async (
       success: true,
       tweet,
     });
-  } catch (error) {
+  } catch (error: any) {
+    let message = "Something went wrong";
+    if (error.code && error.code === PrismaErrorCodes.RecordNotFound) {
+      message = "Invalid ID. Tweet not found";
+    }
     response.status(500).json({
       success: false,
-      message: "Something went wrong",
+      message,
       code: "SET_TWEET_BOOKMARK_STATUS_FAILURE",
     });
   }
