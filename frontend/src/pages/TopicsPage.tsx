@@ -6,7 +6,7 @@ import "../styles/topicsPage.css";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { EditRounded, DeleteRounded } from "@mui/icons-material";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { BackendEndpoints } from "../constants/BackendEndpoints";
 
 interface Topics {
@@ -64,9 +64,9 @@ const TopicsPage = () => {
   const getAllTopics = useCallback(async () => {
     // fetchs all topics from db
     try {
-      console.log("URL:::: ", BackendEndpoints.fetchTopics);
-      console.log("ENV DOMAIN:::", process.env.REACT_APP_BACKEND_DOMAIN);
-      console.log("ENV File:: ", process.env);
+      // console.log("URL:::: ", BackendEndpoints.fetchTopics);
+      // console.log("ENV DOMAIN:::", process.env.REACT_APP_BACKEND_DOMAIN);
+      // console.log("ENV File:: ", process.env);
       const res = await axios.get(BackendEndpoints.fetchTopics);
       if (res.data?.success) {
         setTopics(res.data.topics);
@@ -98,7 +98,7 @@ const TopicsPage = () => {
 
   // routes a user to the topic tweet page when a topic is clicked
   const navigateToTopicTweets = (topic: Topics) => {
-    navigate(`/topics/${topic.id}`, { state: topic });
+    navigate(`/tweets/${topic.id}`, { state: topic });
   };
 
   useEffect(() => {
@@ -116,12 +116,16 @@ const TopicsPage = () => {
             isCurrentlyEditingTopic ? "Edit an existing" : "Add a new"
           } Topic`}</h1>
           <TextField
+            inputProps={{
+              "data-testid": "topic-name"
+            }}
             value={name}
             label={`${isCurrentlyEditingTopic ? "Edit" : "Add"} Topic Name`}
             variant="outlined"
             onChange={onNameChange}
           />
           <TextareaAutosize
+          data-testid="topic-desc"
             value={description}
             aria-label="empty textarea"
             placeholder="Description"

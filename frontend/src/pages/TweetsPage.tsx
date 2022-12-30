@@ -27,7 +27,7 @@ type TweetUrlParams =
 
 const TweetsPage = () => {
   const { id = "" } = useParams();
-  const { state: topic } = useLocation();
+  const { state: topic = {} } = useLocation();
 
   // States
   const [tweets, setTweets] = useState<Tweet[] | null>(null);
@@ -141,7 +141,7 @@ const TweetsPage = () => {
                     )
                     .map((tweet, index) => (
                       <tr key={`${index}-${tweet.tweetId}`}>
-                        <td>{topic.name}</td>
+                        <td>{topic?.name}</td>
                         <td>{getHandler(tweet.text)}</td>
                         <td>{tweet.text}</td>
                       </tr>

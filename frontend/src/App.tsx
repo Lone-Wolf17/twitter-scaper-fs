@@ -12,7 +12,7 @@ import RoutesNames from "./constants/RouteNames";
 import NotFound404 from "./pages/NotFound404";
 
 //MUI Theme to set a default Theme for ap
-const appTheme = createTheme({
+export const appTheme = createTheme({
   palette: {
     primary: {
       main: "#1D98F0",
@@ -36,8 +36,9 @@ function App() {
           <Route path={RoutesNames.home}>
             <Route index element={<TopicsPage />} />
             <Route path={RoutesNames.topicsPage} element={<TopicsPage />} />
-            <Route path={RoutesNames.tweetsPage} element={<TweetsPage />} />
+            {/* <Route path={RoutesNames.tweetsPage} element={<TweetsPage />} /> */}
           </Route>
+          <Route path={RoutesNames.tweetsPage} element={<TweetsPage />} />
           <Route path="*" element={<NotFound404 />} />
         </Routes>
       </BrowserRouter>

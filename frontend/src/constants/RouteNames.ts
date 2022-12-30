@@ -1,6 +1,6 @@
 enum RoutesNames {
   home = "/",
-  tweetsPage = "/topics/:id",
+  tweetsPage = "/tweets/:id",
   topicsPage = "/topics",
 }
 
