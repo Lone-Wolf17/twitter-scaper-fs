@@ -1,5 +1,7 @@
 .tweets-wrapper > main {
   padding: 1em;
+  max-width: 95em;
+  margin: auto;
 }
 
 /* SECTION 1 */

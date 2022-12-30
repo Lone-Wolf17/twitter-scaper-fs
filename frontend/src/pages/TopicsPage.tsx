@@ -141,10 +141,19 @@ const TopicsPage = () => {
     }
   };
 
-  const deleteTopic = async () => {
+  const deleteTopic = async (topic: Topics) => {
     // delete a single topic in db
+    setIsLoading(true);
     try {
-    } catch (error) {}
+      const res = await axios.delete(BackendEndpoints.editTopic(topic.id));
+      console.log(res);
+    } catch (err:any) {
+      toast.error(
+        `${err?.response?.data?.message} ${err?.response?.data?.code}`
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleEditIconClick = (topic: Topics) => {
@@ -260,8 +269,7 @@ const TopicsPage = () => {
                       <td onClick={() => handleEditIconClick(topic)}>
                         <EditRounded sx={{ cursor: "pointer" }} />
                       </td>
-                      <td>
-                        {" "}
+                      <td onClick={() => deleteTopic(topic)}>
                         <DeleteRounded sx={{ cursor: "pointer" }} />{" "}
                       </td>
                     </tr>

@@ -1,10 +1,11 @@
 .topic-wrapper > main {
   padding: 1em;
+  max-width: 95em;
+  margin: auto;
 }
 
 .topic-create {
   display: flex;
-
   flex-direction: column;
 }
 
@@ -13,18 +14,18 @@
 }
 
 .topic-table {
-    text-align: center;
-    border-spacing: 10px 20px;
-    min-width: 570px;
+  text-align: center;
+  border-spacing: 10px 20px;
+  min-width: 570px;
 }
 
-.topic-table td>p {
-    max-width: 300px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin: auto;
+.topic-table td > p {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: auto;
 }
 
 .topic-table-wrapper {
-    overflow-x: auto;
+  overflow-x: auto;
 }
