@@ -1,0 +1,13 @@
+.topic-wrapper > main {
+  padding: 1em;
+}
+
+.topic-create {
+  display: flex;
+
+  flex-direction: column;
+}
+
+.topic-create > * {
+  margin: 1em 0px;
+}

@@ -1,0 +1,38 @@
+.header {
+    padding: 20px;
+    background-color: #1D9BF0;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-family: 'Rubik Gemstones', cursive;
+}
+
+.header>nav>a:first-child {
+    margin-right: 1.5em;
+}
+
+.header>nav>a {
+    color: white;
+    text-decoration: none;
+    background-color: white;
+    color: #1D9BF0;
+    padding: .3em 1em;
+    border-radius: 5px;
+    transition: all 500ms ease-out;
+}
+
+.header>nav>a.active {
+    background-color: transparent;
+    color: white;
+    border: 1px solid white;
+}
+
+.header>nav>a:hover {
+    background-color: transparent;
+    color: white;
+    border: 1px solid white;
+}
