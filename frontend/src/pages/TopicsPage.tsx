@@ -1,7 +1,11 @@
-import { TextareaAutosize, TextField } from "@mui/material";
+import {
+  CircularProgress,
+  TextareaAutosize,
+  TextField,
+  Typography,
+} from "@mui/material";
 import Button from "@mui/material/Button";
 import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
-import CircularProgress from "@mui/material/CircularProgress";
 
 import Header from "../components/Header";
 import "../styles/topicsPage.css";
@@ -21,12 +25,18 @@ interface Topics {
   updatedAt: string;
 }
 
+interface IsCurrentlyEditingTopic {
+  value: boolean;
+  topic: null | Topics;
+}
+
 const TopicsPage = () => {
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
   const [topics, setTopics] = useState<Topics[] | null>(null);
-  const [isCurrentlyEditingTopic, setIsCurrentlyEditingTopic] = useState(false);
+  const [isCurrentlyEditingTopic, setIsCurrentlyEditingTopic] =
+    useState<IsCurrentlyEditingTopic>({ value: false, topic: null });
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
@@ -89,8 +99,46 @@ const TopicsPage = () => {
 
   const editTopic = async () => {
     // edit a single topic in db
+
+    // ignore edit if user didnt make any change
+    const shouldIgnore =
+      name === isCurrentlyEditingTopic.topic?.name &&
+      description === isCurrentlyEditingTopic.topic.description;
+
+    if (shouldIgnore) {
+      return;
+    }
+    setIsLoading(true);
+
     try {
-    } catch (err) {}
+      const payload = JSON.stringify({
+        name,
+        description,
+      });
+
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      await axios.put(
+        BackendEndpoints.editTopic(isCurrentlyEditingTopic.topic!.id),
+        payload,
+        {
+          headers,
+        }
+      );
+      toast.success("Topic Edited Successfully");
+      setName("");
+      setDescription("");
+
+      // refetch topics
+      getAllTopics();
+    } catch (err: any) {
+      toast.error(
+        `${err?.response?.data?.message} ${err?.response?.data?.code}`
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const deleteTopic = async () => {
@@ -101,14 +149,14 @@ const TopicsPage = () => {
 
   const handleEditIconClick = (topic: Topics) => {
     // handles feature of editting a topic
-    setIsCurrentlyEditingTopic(true);
+    setIsCurrentlyEditingTopic({ value: true, topic });
     setName(topic.name);
     setDescription(topic.description);
   };
 
   // routes a user to the topic tweet page when a topic is clicked
   const navigateToTopicTweets = (topic: Topics) => {
-    navigate(`/tweets/${topic.id}`, { state: topic });
+    navigate(`/topics/tweets/${topic.id}`, { state: topic });
   };
 
   useEffect(() => {
@@ -123,14 +171,16 @@ const TopicsPage = () => {
         {/* SECTION 1 (Add or Edit Tweets) */}
         <section className="topic-create">
           <h1>{`${
-            isCurrentlyEditingTopic ? "Edit an existing" : "Add a new"
+            isCurrentlyEditingTopic.value ? "Edit an existing" : "Add a new"
           } Topic`}</h1>
           <TextField
             inputProps={{
               "data-testid": "topic-name",
             }}
             value={name}
-            label={`${isCurrentlyEditingTopic ? "Edit" : "Add"} Topic Name`}
+            label={`${
+              isCurrentlyEditingTopic.value ? "Edit" : "Add"
+            } Topic Name`}
             variant="outlined"
             onChange={onNameChange}
           />
@@ -147,25 +197,38 @@ const TopicsPage = () => {
               minHeight: "100px",
             }}
           />
-          <Button
-            onClick={handleAddTopic}
-            variant="contained"
-            sx={{
-              width: "fit-content",
-              padding: ".2em 3em",
-              alignSelf: "flex-end",
-            }}
-          >
-            {isCurrentlyEditingTopic ? "Edit" : "Add"}
-          </Button>
+          {isLoading ? (
+            <Typography
+              component={"div"}
+              sx={{ display: "flex", justifyContent: "flex-end" }}
+            >
+              <LoadingIndicator isLoading={isLoading} size={20} />
+            </Typography>
+          ) : (
+            <Button
+              onClick={() =>
+                isCurrentlyEditingTopic.value ? editTopic() : handleAddTopic()
+              }
+              variant="contained"
+              sx={{
+                width: "fit-content",
+                padding: ".2em 3em",
+                alignSelf: "flex-end",
+              }}
+            >
+              {isCurrentlyEditingTopic.value ? "Edit" : "Add"}
+            </Button>
+          )}
         </section>
         {/* SECTION 2 (Topics Table) */}
         <section className="topic-list">
           <h2>Topics</h2>
-          <div style={{
-            textAlign:'center'
-          }}>
-            <LoadingIndicator isLoading={isLoading}/>
+          <div
+            style={{
+              textAlign: "center",
+            }}
+          >
+            <LoadingIndicator isLoading={isLoading} />
           </div>
           <div className="topic-table-wrapper">
             {topics && topics.length > 0 ? (
@@ -205,7 +268,7 @@ const TopicsPage = () => {
                   ))}
                 </tbody>
               </table>
-            ) : (
+            ) : topics?.length === 0 ? (
               <p
                 style={{
                   textAlign: "center",
@@ -215,6 +278,8 @@ const TopicsPage = () => {
               >
                 No Topic Found
               </p>
+            ) : (
+              <></>
             )}
           </div>
         </section>

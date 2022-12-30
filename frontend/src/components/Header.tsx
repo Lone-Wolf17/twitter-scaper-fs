@@ -1,12 +1,14 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import RoutesNames from "../constants/RouteNames";
 import "../styles/header.css";
 
 const Header = () => {
   return (
     <header className="header">
-      <p className="logo">Twitter-Scraper</p>
+      <Link to={RoutesNames.home}>
+        <p className="logo">Twitter-Scraper</p>
+      </Link>
       <nav>
         <NavLink
           to={RoutesNames.topicsPage}
@@ -15,10 +17,10 @@ const Header = () => {
           Topics
         </NavLink>
         <NavLink
-          to={RoutesNames.tweetsPage}
+          to={RoutesNames.bookmarkedTweetsPage}
           className={({ isActive }) => (isActive ? "active" : "")}
         >
-          Tweets
+          Bookmarked Tweets
         </NavLink>
       </nav>
     </header>

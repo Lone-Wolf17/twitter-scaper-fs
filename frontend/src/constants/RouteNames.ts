@@ -1,7 +1,8 @@
 enum RoutesNames {
   home = "/",
-  tweetsPage = "/tweets/:id",
   topicsPage = "/topics",
+  tweetsPage = "/topics/tweets/:id",
+  bookmarkedTweetsPage = "tweets/bookmarked",
 }
 
 export default RoutesNames;

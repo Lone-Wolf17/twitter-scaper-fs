@@ -36,9 +36,9 @@ function App() {
           <Route path={RoutesNames.home}>
             <Route index element={<TopicsPage />} />
             <Route path={RoutesNames.topicsPage} element={<TopicsPage />} />
-            {/* <Route path={RoutesNames.tweetsPage} element={<TweetsPage />} /> */}
+            <Route path={RoutesNames.tweetsPage} element={<TweetsPage />} />
           </Route>
-          <Route path={RoutesNames.tweetsPage} element={<TweetsPage />} />
+          {/* <Route path={RoutesNames.tweetsPage} element={<TweetsPage />} /> */}
           <Route path="*" element={<NotFound404 />} />
         </Routes>
       </BrowserRouter>

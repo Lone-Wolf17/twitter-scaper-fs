@@ -4,4 +4,6 @@ export const BackendEndpoints = {
   createTopic: baseUrl + "/topics/create",
   fetchTopics: baseUrl + "/topics/all",
   fetchTopicTweets: baseUrl + "/topics/tweets",
+  editTopic: (id: string): string => baseUrl + "/topics/" + id,
+  
 };
