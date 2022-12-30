@@ -1,0 +1,29 @@
+.tweets-wrapper > main {
+  padding: 1em;
+}
+
+/* SECTION 1 */
+.tweets-sec1 {
+  display: flex;
+  align-items: center;
+}
+
+.tweets-searchBar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 0.2em 1em;
+  margin-right: 1em;
+}
+
+.tweets-searchBar > input {
+  border: none;
+  outline: none;
+  padding-right: 10px;
+  border-radius: 10px;
+  font-size: 1.5rem;
+  flex: 1;
+  width: 100%;
+}

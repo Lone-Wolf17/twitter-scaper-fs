@@ -11,3 +11,20 @@
 .topic-create > * {
   margin: 1em 0px;
 }
+
+.topic-table {
+    text-align: center;
+    border-spacing: 10px 20px;
+    min-width: 570px;
+}
+
+.topic-table td>p {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: auto;
+}
+
+.topic-table-wrapper {
+    overflow-x: auto;
+}
