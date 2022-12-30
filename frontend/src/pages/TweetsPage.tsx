@@ -18,12 +18,13 @@ interface Tweet {
   updatedAt: string;
 }
 
-type TweetUrlParams =
-  | "topicID"
-  | "startTime"
-  | "endTime"
-  | "orderyBy"
-  | "query";
+type GetTweetFilters = {
+  topicID?: string;
+  startTime?: string;
+  endTime?: string;
+  orderBy?: string;
+  query?: string;
+};
 
 const TweetsPage = () => {
   const { id = "" } = useParams();
@@ -44,23 +45,21 @@ const TweetsPage = () => {
   );
 
   // Gets all the tweets
-  const getTopicTweets = useCallback(
-    async (paramsObj: Record<TweetUrlParams, string>) => {
-      const searchParams = new URLSearchParams(paramsObj.toString());
+  const getTopicTweets = useCallback(async (filter: GetTweetFilters) => {
+    const paramsObj = Object.entries(filter);
+    const searchParams = new URLSearchParams(paramsObj.toString());
 
-      try {
-        const res = await axios.get(
-          BackendEndpoints.fetchTopicTweets + `?${searchParams}`
-        );
-        console.log(res);
-        setTweets(res.data.tweets);
-      } catch (err: any) {
-        console.log(err);
-        toast.error(err.response?.data?.code);
-      }
-    },
-    []
-  );
+    try {
+      const res = await axios.get(
+        BackendEndpoints.fetchTopicTweets + `?${searchParams}`
+      );
+      console.log(res);
+      setTweets(res.data.tweets);
+    } catch (err: any) {
+      console.log(err.response?.data);
+      toast.error(err.response?.data?.code);
+    }
+  }, []);
 
   const getHandler = (tweet: string) => {
     const match = tweet.match(/(@.+?)\s/i);
@@ -84,10 +83,10 @@ const TweetsPage = () => {
   useEffect(() => {
     getTopicTweets({
       topicID: id,
-      startTime: "",
-      endTime: "",
-      orderyBy: "",
-      query: "",
+      // startTime: "",
+      // endTime: "",
+      // orderyBy: "",
+      // query: "",
     });
   });
 
@@ -111,9 +110,9 @@ const TweetsPage = () => {
             onClick={() => {
               getTopicTweets({
                 topicID: id,
-                startTime: "",
-                endTime: "",
-                orderyBy: "",
+                // startTime: "",
+                // endTime: "",
+                // orderyBy: "",
                 query: searchInput,
               });
             }}
