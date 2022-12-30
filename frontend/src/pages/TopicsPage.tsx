@@ -1,6 +1,8 @@
 import { TextareaAutosize, TextField } from "@mui/material";
 import Button from "@mui/material/Button";
 import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
+import CircularProgress from "@mui/material/CircularProgress";
+
 import Header from "../components/Header";
 import "../styles/topicsPage.css";
 import axios from "axios";
@@ -8,6 +10,7 @@ import { toast } from "react-toastify";
 import { EditRounded, DeleteRounded } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { BackendEndpoints } from "../constants/BackendEndpoints";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 interface Topics {
   createdAt: string;
@@ -20,6 +23,8 @@ interface Topics {
 
 const TopicsPage = () => {
   const navigate = useNavigate();
+
+  const [isLoading, setIsLoading] = useState(false);
   const [topics, setTopics] = useState<Topics[] | null>(null);
   const [isCurrentlyEditingTopic, setIsCurrentlyEditingTopic] = useState(false);
   const [name, setName] = useState("");
@@ -39,7 +44,7 @@ const TopicsPage = () => {
       name: name,
       description: description,
     });
-
+    setIsLoading(true);
     try {
       const res = await axios.post(BackendEndpoints.createTopic, payload, {
         headers: {
@@ -58,11 +63,14 @@ const TopicsPage = () => {
       );
       setName("");
       setDescription("");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const getAllTopics = useCallback(async () => {
     // fetchs all topics from db
+    setIsLoading(true);
     try {
       // console.log("URL:::: ", BackendEndpoints.fetchTopics);
       // console.log("ENV DOMAIN:::", process.env.REACT_APP_BACKEND_DOMAIN);
@@ -74,6 +82,8 @@ const TopicsPage = () => {
     } catch (err: any) {
       console.log(err);
       toast.error(err.response?.data?.code);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -117,7 +127,7 @@ const TopicsPage = () => {
           } Topic`}</h1>
           <TextField
             inputProps={{
-              "data-testid": "topic-name"
+              "data-testid": "topic-name",
             }}
             value={name}
             label={`${isCurrentlyEditingTopic ? "Edit" : "Add"} Topic Name`}
@@ -125,7 +135,7 @@ const TopicsPage = () => {
             onChange={onNameChange}
           />
           <TextareaAutosize
-          data-testid="topic-desc"
+            data-testid="topic-desc"
             value={description}
             aria-label="empty textarea"
             placeholder="Description"
@@ -152,6 +162,11 @@ const TopicsPage = () => {
         {/* SECTION 2 (Topics Table) */}
         <section className="topic-list">
           <h2>Topics</h2>
+          <div style={{
+            textAlign:'center'
+          }}>
+            <LoadingIndicator isLoading={isLoading}/>
+          </div>
           <div className="topic-table-wrapper">
             {topics && topics.length > 0 ? (
               <table className="topic-table" width={"100%"}>

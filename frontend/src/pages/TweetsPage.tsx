@@ -5,10 +5,12 @@ import { toast } from "react-toastify";
 import { SearchRounded } from "@mui/icons-material";
 import Button from "@mui/material/Button";
 import Pagination from "@mui/material/Pagination";
+import CircularProgress from "@mui/material/CircularProgress";
 
 import Header from "../components/Header";
 import "../styles/tweetsPage.css";
 import { BackendEndpoints } from "../constants/BackendEndpoints";
+import LoadingIndicator from "../components/LoadingIndicator";
 
 interface Tweet {
   createdAt: string;
@@ -31,6 +33,7 @@ const TweetsPage = () => {
   const { state: topic = {} } = useLocation();
 
   // States
+  const [isLoading, setIsLoading] = useState(false);
   const [tweets, setTweets] = useState<Tweet[] | null>(null);
   const [searchInput, setSearchInput] = useState("");
   const [currentPageIndex, setCurrentPageIndex] = useState(1);
@@ -49,6 +52,7 @@ const TweetsPage = () => {
     const paramsObj = Object.entries(filter);
     const searchParams = new URLSearchParams(paramsObj.toString());
 
+    setIsLoading(true);
     try {
       const res = await axios.get(
         BackendEndpoints.fetchTopicTweets + `?${searchParams}`
@@ -58,6 +62,8 @@ const TweetsPage = () => {
     } catch (err: any) {
       console.log(err.response?.data);
       toast.error(err.response?.data?.code);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -122,6 +128,7 @@ const TweetsPage = () => {
         </section>
         {/* SECTION 2 (TWEETS TABLE) */}
         <section>
+          <LoadingIndicator isLoading={isLoading} />
           <div className="topic-table-wrapper">
             {tweets && tweets?.length > 0 ? (
               <table className="topic-table" width={"100%"}>
@@ -147,7 +154,7 @@ const TweetsPage = () => {
                     ))}
                 </tbody>
               </table>
-            ) : (
+            ) : tweets?.length === 0 ? (
               <p
                 style={{
                   textAlign: "center",
@@ -157,6 +164,8 @@ const TweetsPage = () => {
               >
                 No Tweet Found
               </p>
+            ) : (
+              <></>
             )}
           </div>
           {/* PAGINATION */}
