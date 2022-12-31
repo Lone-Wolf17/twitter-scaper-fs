@@ -1,6 +1,7 @@
 import { refType } from "@mui/utils";
 import { useCallback, useMemo, useState } from "react";
-import { returnValue, routeType } from "../types/topic.dto";
+import { returnValue } from "../types/topic.dto";
+import { routeType } from "../types/tweet.dto";
 import axiosInstance from '../utils/axios-utils';
 
 function TweetApi(routeType: routeType): returnValue {

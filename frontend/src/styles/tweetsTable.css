@@ -1,0 +1,25 @@
+.tweet-table {
+    text-align: center;
+    border-spacing: 10px 20px;
+    min-width: 570px;
+}
+
+.tweet-table tr {
+    transition: all 500ms ease-in-out;
+}
+
+.tweet-table tr>td:first-child {
+    cursor: pointer;
+}
+
+
+.tweet-table td {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: auto;
+}
+
+.tweet-table-wrapper {
+    overflow-x: auto;
+}

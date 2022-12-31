@@ -4,6 +4,13 @@ interface Tweet {
   topicId: string;
   tweetId: string;
   updatedAt: string;
+  bookmarked: boolean;
+  tweeterId: string;
+  tweeter: {
+    id: string;
+    name: string;
+    username: string;
+  };
 }
 
 interface TweetData {
@@ -24,4 +31,6 @@ type GetTweetFilters = {
   bookmarked?: string;
 };
 
-export type { GetTweetFilters, Tweet, TweetData };
+type routeType = "Get-All" | "Get-Bookmarked" | "Set-Bookmark";
+
+export type { GetTweetFilters, Tweet, TweetData, routeType };
