@@ -72,6 +72,9 @@ const fetchTweets = async ({
   return prismaClient.$transaction([
     prismaClient.tweet.findMany({
       where: whereQuery,
+      include: {
+        tweeter: true,
+      },
       orderBy: { createdAt: orderBy as Prisma.SortOrder },
       take: result_per_page,
       skip: (current_page - 1) * result_per_page,

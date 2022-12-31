@@ -28,9 +28,19 @@ model Tweet {
   text        String
   topic       Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
   topicId     String
+ tweeter     Tweeter    @relation(fields: [tweeterId], references: [id], onDelete: Cascade)
+  tweeterId   String
   createdAt   DateTime
   updatedAt   DateTime @default(now()) @updatedAt
   bookmarked  Boolean  @default(false)
   
   @@map("tweets")
+}
+
+// Tweet user who made the tweet
+model Tweeter {
+  id          String  @id
+  name        String
+  username    String
+  tweets      Tweet[]
 }

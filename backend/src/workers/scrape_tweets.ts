@@ -23,17 +23,41 @@ cron.schedule("0/15 * * * * *", async () => {
       const tweets = (
         await twitterClient.v2.search(topic.slug, {
           "tweet.fields": "created_at",
+          "user.fields": "username",
+          expansions: "author_id",
         })
       ).data;
 
       tweetCount = tweets.data.length;
+      
+      /// We updat the tweeter table, so we can safely reference it in the tweet tabel
+      await prismaClient.$transaction(
+        tweets.includes.users.map((user) =>
+          prismaClient.tweeter.upsert({
+            where: {
+              id: user.id,
+            },
+            create: {
+              id: user.id,
+              name: user.name,
+              username: user.name,
+            },
+            update: {
+              name: user.name,
+              username: user.username,
+            },
+          })
+        )
+      );
+
       await prismaClient.tweet.createMany({
         data: tweets.data.map((v) => {
           return {
             tweetId: v.id,
             text: v.text,
             topicId: topic.id,
-            createdAt: new Date(),
+            createdAt: new Date(v.created_at),
+            tweeterId: v.author_id,
           };
         }),
         skipDuplicates: true,
