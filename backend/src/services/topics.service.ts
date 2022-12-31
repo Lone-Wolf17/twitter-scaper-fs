@@ -10,6 +10,7 @@ import slugify from "slugify";
 import {
   FetchTweetsInput,
   SetBookmarkTweetInput,
+  FetchBookmarkedTweetsInput,
 } from "../schemas/topics.schema";
 
 const createTopic = async (input: CreateTopicsBody) => {
@@ -74,6 +75,7 @@ const fetchTweets = async ({
       where: whereQuery,
       include: {
         tweeter: true,
+        topic: true
       },
       orderBy: { createdAt: orderBy as Prisma.SortOrder },
       take: result_per_page,
@@ -114,7 +116,38 @@ const setTweetBookmarkStatus = async ({
     data: {
       bookmarked,
     },
+    include: {
+      topic: true,
+      tweeter: true,
+    },
   });
+};
+
+const fetchBookmarkedTweets = async ({
+  limit,
+  page,
+}: FetchBookmarkedTweetsInput) => {
+  const result_per_page = limit ? Number(limit) : 50;
+  const current_page = page ? Number(page) : 1;
+
+  const whereQuery = {
+    bookmarked: true,
+  };
+
+  return prismaClient.$transaction([
+    prismaClient.tweet.findMany({
+      where: whereQuery,
+      include: {
+        topic: true,
+        tweeter: true,
+      },
+      take: result_per_page,
+      skip: (current_page - 1) * result_per_page,
+    }),
+    prismaClient.tweet.count({
+      where: whereQuery,
+    }),
+  ]);
 };
 
 export default {
@@ -124,4 +157,5 @@ export default {
   updateTopic,
   removeTopic,
   setTweetBookmarkStatus,
+  fetchBookmarkedTweets,
 };

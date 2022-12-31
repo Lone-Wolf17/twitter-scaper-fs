@@ -70,6 +70,13 @@ export const setBookmarkTweetSchema = object({
   }),
 });
 
+export const fetchBookmarkedTweetsSchema = object({
+  query: object({
+    page: pageNumberSchema,
+    limit: paginationLimitSchema,
+  }),
+});
+
 export type CreateTopicInput = TypeOf<typeof createTopicSchema>["body"];
 export type UpdateTopicBody = CreateTopicInput;
 export type FetchTopicsInput = TypeOf<typeof fetchTopicsSchema>["query"];
@@ -77,3 +84,4 @@ export type FetchTweetsInput = TypeOf<typeof fetchTweetsSchema>["query"];
 export type SetBookmarkTweetInput = TypeOf<
   typeof setBookmarkTweetSchema
 >["body"];
+export type FetchBookmarkedTweetsInput = TypeOf<typeof fetchBookmarkedTweetsSchema>["query"];

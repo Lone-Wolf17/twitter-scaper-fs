@@ -1,4 +1,5 @@
 import {
+  FetchBookmarkedTweetsInput,
   FetchTopicsInput,
   FetchTweetsInput,
   SetBookmarkTweetInput,
@@ -159,6 +160,35 @@ export const setTweetBookmarkStatus = async (
       success: false,
       message,
       code: "SET_TWEET_BOOKMARK_STATUS_FAILURE",
+    });
+  }
+};
+
+export const fetchBookmarkedTweets = async (
+  request: Request<any, any, any, FetchBookmarkedTweetsInput>,
+  response: Response
+) => {
+  try {
+    let [result, count] = await TopicsService.fetchBookmarkedTweets(
+      request.query
+    );
+
+    response.status(200).json({
+      success: true,
+      ...paginateResult({
+        current_page: request.query.page,
+        limit: request.query.limit,
+        item_count: count,
+      }),
+      tweets: result,
+      count: count,
+    });
+  } catch (error) {
+    console.log(error);
+    response.status(500).json({
+      success: false,
+      message: "Something went wrong",
+      code: "BOOKMARKED_TWEETS_RETRIEVAL_FAILURE",
     });
   }
 };

@@ -4,6 +4,7 @@ import {
   createTopicSchema,
   fetchTweetsSchema,
   setBookmarkTweetSchema,
+  fetchBookmarkedTweetsSchema,
 } from "../schemas/topics.schema";
 import { validate } from "../middlewares/validate";
 import * as TopicsController from "../controllers/topics.controller";
@@ -32,6 +33,12 @@ router.put(
   "/tweets/setBookmarkStatus",
   validate(setBookmarkTweetSchema),
   TopicsController.setTweetBookmarkStatus
+);
+
+router.get(
+  "/tweets/bookmarked",
+  validate(fetchBookmarkedTweetsSchema),
+  TopicsController.fetchBookmarkedTweets
 );
 
 export default router;
