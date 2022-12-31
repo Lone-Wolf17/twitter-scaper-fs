@@ -8,7 +8,8 @@ import "react-toastify/dist/ReactToastify.css";
 import "./styles/App.css";
 import TopicsPage from "./pages/TopicsPage";
 import TweetsPage from "./pages/TweetsPage";
-import RoutesNames from "./constants/RouteNames";
+import BookmarkedTweetsPage from "./pages/BookmarkedTweetsPage";
+import RoutesPaths from "./constants/RoutePaths";
 import NotFound404 from "./pages/NotFound404";
 
 //MUI Theme to set a default Theme for ap
@@ -33,12 +34,15 @@ function App() {
 
       <BrowserRouter>
         <Routes>
-          <Route path={RoutesNames.home}>
+          <Route path={RoutesPaths.home}>
             <Route index element={<TopicsPage />} />
-            <Route path={RoutesNames.topicsPage} element={<TopicsPage />} />
-            <Route path={RoutesNames.tweetsPage} element={<TweetsPage />} />
+            <Route path={RoutesPaths.topicsPage} element={<TopicsPage />} />
+            <Route path={RoutesPaths.tweetsPage} element={<TweetsPage />} />
           </Route>
-          {/* <Route path={RoutesNames.tweetsPage} element={<TweetsPage />} /> */}
+          <Route
+            path={RoutesPaths.bookmarkedTweetsPage}
+            element={<BookmarkedTweetsPage />}
+          />
           <Route path="*" element={<NotFound404 />} />
         </Routes>
       </BrowserRouter>

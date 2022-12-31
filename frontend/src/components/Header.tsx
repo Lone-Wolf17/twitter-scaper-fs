@@ -1,23 +1,17 @@
 import React from "react";
 import { NavLink, Link } from "react-router-dom";
-import RoutesNames from "../constants/RouteNames";
+import RoutesPaths from "../constants/RoutePaths";
 import "../styles/header.css";
 
 const Header = () => {
   return (
     <header className="header">
-      <Link to={RoutesNames.home}>
+      <Link to={RoutesPaths.home}>
         <p className="logo">Twitter-Scraper</p>
       </Link>
       <nav>
-        {/* <NavLink
-          to={RoutesNames.topicsPage}
-          className={({ isActive }) => (isActive ? "active" : "")}
-        >
-          Topics
-        </NavLink> */}
         <NavLink
-          to={RoutesNames.bookmarkedTweetsPage}
+          to={RoutesPaths.bookmarkedTweetsPage}
           className={({ isActive }) => (isActive ? "active" : "")}
         >
           Bookmarked Tweets

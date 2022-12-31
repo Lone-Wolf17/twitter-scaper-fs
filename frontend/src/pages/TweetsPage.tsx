@@ -5,7 +5,7 @@ import React, {
   ChangeEvent,
   useMemo,
 } from "react";
-import { useParams, useLocation } from "react-router-dom";
+import { useParams} from "react-router-dom";
 import { toast } from "react-toastify";
 import { SearchRounded } from "@mui/icons-material";
 import Button from "@mui/material/Button";
@@ -24,7 +24,6 @@ import { DateTime } from "luxon";
 
 import Header from "../components/Header";
 import "../styles/tweetsPage.css";
-import { Tweet } from "../types/tweet.dto";
 import { GetTweetFilters, TweetData } from "../types/tweet.dto";
 import useTweetApi from "../api-hooks/useTweetApi";
 import TweetsTable from "../components/TweetsTable";
@@ -33,10 +32,10 @@ type OrderByType = "asc" | "desc";
 
 const TweetsPage = () => {
   const { id = "" } = useParams();
-  const { state: topic = {} } = useLocation();
+  
   const [getTweetsTrigger, { isLoading: getTweetIsLoading, isError }] =
     useTweetApi("Get-All");
-  // const [setTweetBookmarkStatusTrigger] = useTweetApi("Set-Bookmark");
+  
   // States
   const [tweetsData, setTweetsData] = useState<TweetData | null>(null);
   const [searchInput, setSearchInput] = useState("");
@@ -227,7 +226,7 @@ const TweetsPage = () => {
            <TweetsTable
              isLoading={getTweetIsLoading}
              isError={isError}
-             topic={topic}
+             parentComponent={"Topic-Tweets"}
              tweetsData={tweetsData}
              paginationOnchange={handlePaginationOnChange}
            />

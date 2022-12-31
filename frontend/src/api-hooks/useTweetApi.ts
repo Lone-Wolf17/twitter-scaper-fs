@@ -1,8 +1,7 @@
-import { refType } from "@mui/utils";
 import { useCallback, useMemo, useState } from "react";
 import { returnValue } from "../types/topic.dto";
 import { routeType } from "../types/tweet.dto";
-import axiosInstance from '../utils/axios-utils';
+import axiosInstance from "../utils/axios-utils";
 
 function TweetApi(routeType: routeType): returnValue {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,8 +23,9 @@ function TweetApi(routeType: routeType): returnValue {
     (urlParams: string) => {
       setIsLoading(true);
       return new Promise((resolve, reject) => {
+        const headers = { "Content-Type": "application/json" };
         axiosInstance
-          .get(`/topics/tweets?${urlParams}`)
+          .get(`/topics/tweets?${urlParams}`, { headers })
           .then((res: any) => {
             onSuccess();
             resolve(res);
@@ -39,6 +39,47 @@ function TweetApi(routeType: routeType): returnValue {
     [onFailure, onSuccess]
   );
 
+  const setTweetBookmarkStatus = useCallback(
+    (payload: any) => {
+      setIsLoading(true);
+      return new Promise((resolve, reject) => {
+        const headers = { "Content-Type": "application/json" };
+        axiosInstance
+          .put(`/topics/tweets/setBookmarkStatus`, payload, {
+            headers,
+          })
+          .then((res) => {
+            onSuccess();
+            resolve(res);
+          })
+          .catch((err) => {
+            onFailure(err);
+            reject(err);
+          });
+      });
+    },
+    [onFailure, onSuccess]
+  );
+
+  const getBookmarkedTweets = useCallback(() => {
+    setIsLoading(true);
+    return new Promise((resolve, reject) => {
+      const headers = { "Content-Type": "application/json" };
+      axiosInstance
+        .get(`/topics/tweets/bookmarked`, {
+          headers,
+        })
+        .then((res) => {
+          onSuccess();
+          resolve(res);
+        })
+        .catch((err) => {
+          onFailure(err);
+          reject(err);
+        });
+    });
+  }, [onFailure, onSuccess]);
+
   const defaultTopic = useCallback(() => {
     return new Promise((resolve, reject) => {
       reject();
@@ -49,10 +90,21 @@ function TweetApi(routeType: routeType): returnValue {
     switch (routeType) {
       case "Get-All":
         return getTopicTweets;
+      case "Set-Bookmark":
+        return setTweetBookmarkStatus;
+      case "Get-Bookmarked":
+        return getBookmarkedTweets;
       default:
         return defaultTopic;
     }
-  }, [defaultTopic, getTopicTweets, routeType]);
+  }, [
+    defaultTopic,
+    getBookmarkedTweets,
+    getTopicTweets,
+    routeType,
+    setTweetBookmarkStatus,
+  ]);
+
   return [trigger, { isLoading, isError, error }];
 }
 

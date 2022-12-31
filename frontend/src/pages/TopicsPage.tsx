@@ -9,11 +9,9 @@ import React, { ChangeEvent, useCallback, useEffect, useState } from "react";
 
 import Header from "../components/Header";
 import "../styles/topicsPage.css";
-import axios from "axios";
 import { toast } from "react-toastify";
 import { EditRounded, DeleteRounded } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
-import { BackendEndpoints } from "../constants/BackendEndpoints";
 import LoadingIndicator from "../components/LoadingIndicator";
 import { IsCurrentlyEditingTopic, Topics } from "../types/topic.dto";
 import useTopicApi from "../api-hooks/useTopicApi";

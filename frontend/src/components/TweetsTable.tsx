@@ -26,13 +26,14 @@ interface propType {
   topic?: Topics;
 
   paginationOnchange: (e: React.ChangeEvent<unknown>, value: number) => void;
+  parentComponent: "BookmarkedTweets" | "Topic-Tweets";
 }
 
 function TweetsTable({
   tweetsData,
   isLoading,
   isError,
-  topic,
+  parentComponent,
   paginationOnchange,
 }: propType) {
   const [setTweetBookmarkStatusTrigger] = useTweetApi("Set-Bookmark");
@@ -52,18 +53,17 @@ function TweetsTable({
       );
 
       // Update tweetData array
-
-      for (let i = 0; i < tweetsData?.tweets!?.length; i++) {
-        const item = tweetsData?.tweets[i];
-
-        if (item?.tweetId === res?.data?.topic?.tweetId) {
-          tweetsData?.tweets.splice(i, 1, {
-            ...res?.data?.topic,
-            tweeter: item?.tweeter,
-          });
-
-          i = tweetsData?.tweets!?.length;
-        }
+      const index = tweetsData?.tweets.findIndex(
+        (element) => element.tweetId === tweet.tweetId
+      )!;
+      if (parentComponent === "BookmarkedTweets") {
+        // Removed from list
+        tweetsData?.tweets.splice(index, 1);
+      } else {
+        tweetsData!.tweets![index] = {
+          ...res?.data?.topic,
+          tweeter: tweet?.tweeter,
+        };
       }
     } catch (err: any) {
       if (err.response.status === 500 || !err.response?.data?.code) {
@@ -122,7 +122,7 @@ function TweetsTable({
                     )}
                   </td>
 
-                  <td>{topic?.name}</td>
+                  <td>{tweet?.topic.name}</td>
 
                   <td>{`@${tweet?.tweeter?.username}`}</td>
 

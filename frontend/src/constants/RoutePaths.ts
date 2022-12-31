@@ -1,8 +1,8 @@
-enum RoutesNames {
+enum RoutesPaths {
   home = "/",
   topicsPage = "/topics",
   tweetsPage = "/topics/tweets/:id",
   bookmarkedTweetsPage = "tweets/bookmarked",
 }
 
-export default RoutesNames;
+export default RoutesPaths;

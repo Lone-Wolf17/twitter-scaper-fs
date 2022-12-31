@@ -1,8 +1,11 @@
+import { Topics } from "./topic.dto";
+
 interface Tweet {
   createdAt: string;
   text: string;
   topicId: string;
   tweetId: string;
+  topic: Topics;
   updatedAt: string;
   bookmarked: boolean;
   tweeterId: string;
