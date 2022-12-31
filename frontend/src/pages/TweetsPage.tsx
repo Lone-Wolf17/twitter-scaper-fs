@@ -5,96 +5,89 @@ import { toast } from "react-toastify";
 import { SearchRounded } from "@mui/icons-material";
 import Button from "@mui/material/Button";
 import Pagination from "@mui/material/Pagination";
-import CircularProgress from "@mui/material/CircularProgress";
 
 import Header from "../components/Header";
 import "../styles/tweetsPage.css";
 import { BackendEndpoints } from "../constants/BackendEndpoints";
 import LoadingIndicator from "../components/LoadingIndicator";
+import { Tweet } from "../types/tweet.dto";
+import { GetTweetFilters, TweetData } from "../types/tweet.dto";
+import useTweetApi from "../api-hooks/useTweetApi";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import {
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  TextField,
+} from "@mui/material";
+import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
+import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import { DateTime } from "luxon";
 
-interface Tweet {
-  createdAt: string;
-  text: string;
-  topicId: string;
-  tweetId: string;
-  updatedAt: string;
-}
-
-type GetTweetFilters = {
-  topicID?: string;
-  startTime?: string;
-  endTime?: string;
-  orderBy?: string;
-  query?: string;
-};
+type OrderByType = "asc" | "desc";
 
 const TweetsPage = () => {
   const { id = "" } = useParams();
   const { state: topic = {} } = useLocation();
+  const [getTweetsTrigger, { isLoading, isError }] = useTweetApi("Get-All");
 
   // States
-  const [isLoading, setIsLoading] = useState(false);
-  const [tweets, setTweets] = useState<Tweet[] | null>(null);
+  const [tweetsData, setTweetsData] = useState<TweetData | null>(null);
   const [searchInput, setSearchInput] = useState("");
-  const [currentPageIndex, setCurrentPageIndex] = useState(1);
-  const [currentTweetArrayStartIndex, setCurrentTweetArrayStartIndex] =
-    useState(0);
-  const [tweetPerPage, setTweetPerPage] = useState(20);
+  const [startTime, setStartTime] = useState<DateTime | null>(null);
+  const [endTime, setEndTime] = useState<DateTime | null>(null);
+  const [orderBy, setOrderBy] = useState<OrderByType>("desc");
 
   // Input callback func
   const searchInputOnChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value),
     []
   );
+  const startTimeOnChange = useCallback(
+    (value: any) => setStartTime(value),
+    []
+  );
+  const endTimeOnChange = useCallback((value: any) => setEndTime(value), []);
+  const orderByOnChange = (event: SelectChangeEvent) =>
+    setOrderBy(event.target.value as OrderByType);
 
   // Gets all the tweets
-  const getTopicTweets = useCallback(async (filter: GetTweetFilters) => {
-    const paramsObj = Object.entries(filter);
-    const searchParams = new URLSearchParams(paramsObj.toString());
+  const getTopicTweets = useCallback(
+    async (filter: GetTweetFilters) => {
+      const paramsObj = Object.entries(filter);
+      const searchParams = new URLSearchParams(paramsObj.toString());
 
-    setIsLoading(true);
-    try {
-      const res = await axios.get(
-        BackendEndpoints.fetchTopicTweets + `?${searchParams}`
-      );
-      console.log(res);
-      setTweets(res.data.tweets);
-    } catch (err: any) {
-      console.log(err.response?.data);
-      toast.error(err.response?.data?.code);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  const getHandler = (tweet: string) => {
-    const match = tweet.match(/(@.+?)\s/i);
-    if (match) {
-      return match[1];
-    } else {
-      // console.log(tweet)
-      return tweet;
-    }
-  };
+      // setIsLoading(true);
+      try {
+        const res: any = await getTweetsTrigger(searchParams);
+        setTweetsData(res?.data);
+      } catch (err: any) {
+        console.log(err.response?.data);
+        if (err.response?.data?.code) {
+          toast.error(err.response?.data?.code);
+        } else {
+          toast.error("Oops An error occurred ");
+        }
+      }
+    },
+    [getTweetsTrigger]
+  );
 
   // handles pagination on page change
   const handlePaginationOnChange = (
     e: React.ChangeEvent<unknown>,
     value: number
-  ) => {
-    setCurrentTweetArrayStartIndex((value - 1) * tweetPerPage);
-    setCurrentPageIndex(value);
-  };
+  ) => {};
 
   useEffect(() => {
     getTopicTweets({
       topicID: id,
-      // startTime: "",
-      // endTime: "",
-      // orderyBy: "",
-      // query: "",
+      limit: "20",
+      page: "1",
     });
-  });
+  }, [getTopicTweets, id]);
 
   return (
     <div className="tweets-wrapper">
@@ -116,21 +109,84 @@ const TweetsPage = () => {
             onClick={() => {
               getTopicTweets({
                 topicID: id,
-                // startTime: "",
-                // endTime: "",
-                // orderyBy: "",
+                startTime: startTime ? startTime.toISODate() : "",
+                endTime: endTime ? endTime.toISODate() : "",
+                orderBy: orderBy,
                 query: searchInput,
+                limit: "20",
+                page: "1",
               });
             }}
           >
             Search
           </Button>
         </section>
-        {/* SECTION 2 (TWEETS TABLE) */}
+        <section className="tweets-sec2">
+          <LocalizationProvider dateAdapter={AdapterLuxon}>
+            <DesktopDatePicker
+              label="Start Time"
+              value={startTime}
+              disableMaskedInput
+              onChange={startTimeOnChange}
+              renderInput={(params) => <TextField {...params} />}
+            />
+          </LocalizationProvider>
+          <LocalizationProvider dateAdapter={AdapterLuxon}>
+            <DesktopDatePicker
+              label="End Time"
+              value={endTime}
+              disableMaskedInput
+              onChange={endTimeOnChange}
+              renderInput={(params) => <TextField {...params} />}
+            />
+          </LocalizationProvider>
+          <FormControl fullWidth>
+            <InputLabel id="orderLabelById">Order By</InputLabel>
+            <Select
+              labelId="orderLabelById"
+              id="demo-simple-select"
+              value={orderBy}
+              label="Order By"
+              onChange={orderByOnChange}
+            >
+              <MenuItem value={"asc"}>Ascending</MenuItem>
+              <MenuItem value={"desc"}>Decending</MenuItem>
+            </Select>
+          </FormControl>
+          <Button
+            disabled={isLoading}
+            onClick={() => {
+              getTopicTweets({
+                topicID: id,
+                startTime: startTime ? startTime.toISODate() : "",
+                endTime: endTime ? endTime.toISODate() : "",
+                orderBy: orderBy,
+                query: searchInput,
+                limit: "20",
+                page: "1",
+              });
+            }}
+            variant="contained"
+          >
+            Filter
+          </Button>
+        </section>
+        {/* SECTION 3 (TWEETS TABLE) */}
         <section>
-          <LoadingIndicator isLoading={isLoading} />
+          {isLoading && <LoadingIndicator />}
+
           <div className="topic-table-wrapper">
-            {tweets && tweets?.length > 0 ? (
+            {isError ? (
+              <p
+                style={{
+                  textAlign: "center",
+                  fontSize: "1.2rem",
+                  marginTop: "2em",
+                }}
+              >
+                An Error occurred while trying to fetch tweets
+              </p>
+            ) : tweetsData && tweetsData.tweets?.length > 0 ? (
               <table className="topic-table" width={"100%"}>
                 <thead>
                   <tr>
@@ -140,21 +196,16 @@ const TweetsPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {tweets
-                    ?.slice(
-                      currentTweetArrayStartIndex,
-                      tweetPerPage * currentPageIndex
-                    )
-                    .map((tweet, index) => (
-                      <tr key={`${index}-${tweet.tweetId}`}>
-                        <td>{topic?.name}</td>
-                        <td>{getHandler(tweet.text)}</td>
-                        <td>{tweet.text}</td>
-                      </tr>
-                    ))}
+                  {tweetsData.tweets?.map((tweet, index) => (
+                    <tr key={`${index}-${tweet.tweetId}`}>
+                      <td>{topic?.name}</td>
+                      <td>{tweet.text}</td>
+                      <td>{tweet.text}</td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-            ) : tweets?.length === 0 ? (
+            ) : tweetsData?.tweets?.length === 0 ? (
               <p
                 style={{
                   textAlign: "center",
@@ -169,10 +220,10 @@ const TweetsPage = () => {
             )}
           </div>
           {/* PAGINATION */}
-          {tweets && tweets.length > 0 && (
+          {tweetsData && tweetsData?.meta?.last_page > 1 && (
             <Pagination
               color="primary"
-              count={Math.ceil(tweets.length / tweetPerPage)}
+              count={Math.ceil(tweetsData.meta.last_page)}
               size="large"
               onChange={handlePaginationOnChange}
               sx={{ display: "flex", justifyContent: "center" }}

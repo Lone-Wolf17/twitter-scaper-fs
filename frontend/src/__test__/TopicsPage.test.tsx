@@ -1,7 +1,7 @@
 // import { render, screen } from '@testing-library/react';
 
 import React from "react";
-import { fireEvent, render, screen } from "../../utils/test-utils";
+import { fireEvent, render, screen } from "../utils/test-utils";
 import TopicsPage from "../pages/TopicsPage";
 
 describe("test for TopicsPage", () => {

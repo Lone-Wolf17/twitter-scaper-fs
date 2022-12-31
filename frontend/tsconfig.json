@@ -16,5 +16,5 @@
     "noEmit": true,
     "jsx": "react-jsx"
   },
-  "include": ["src", "utils/test-utils.tsx", "src/reportWebVitals.ts"]
+  "include": ["src", "src/utils/test-utils.tsx", "src/reportWebVitals.ts"]
 }

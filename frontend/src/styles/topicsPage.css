@@ -19,7 +19,13 @@
   min-width: 570px;
 }
 
-.topic-table td > p {
+.topic-table tr {
+    transition: all 500ms ease-in-out;
+    cursor: pointer;
+}
+
+
+.topic-table td {
   max-width: 300px;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -10,12 +10,12 @@ const Header = () => {
         <p className="logo">Twitter-Scraper</p>
       </Link>
       <nav>
-        <NavLink
+        {/* <NavLink
           to={RoutesNames.topicsPage}
           className={({ isActive }) => (isActive ? "active" : "")}
         >
           Topics
-        </NavLink>
+        </NavLink> */}
         <NavLink
           to={RoutesNames.bookmarkedTweetsPage}
           className={({ isActive }) => (isActive ? "active" : "")}

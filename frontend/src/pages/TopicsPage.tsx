@@ -1,5 +1,5 @@
 import {
-  CircularProgress,
+  Pagination,
   TextareaAutosize,
   TextField,
   Typography,
@@ -15,26 +15,28 @@ import { EditRounded, DeleteRounded } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { BackendEndpoints } from "../constants/BackendEndpoints";
 import LoadingIndicator from "../components/LoadingIndicator";
-
-interface Topics {
-  createdAt: string;
-  description: string;
-  id: string;
-  name: string;
-  slug: string;
-  updatedAt: string;
-}
-
-interface IsCurrentlyEditingTopic {
-  value: boolean;
-  topic: null | Topics;
-}
+import { IsCurrentlyEditingTopic, Topics } from "../types/topic.dto";
+import useTopicApi from "../api-hooks/useTopicApi";
 
 const TopicsPage = () => {
   const navigate = useNavigate();
+  const [
+    getTopicTrigger,
+    { isLoading: getTopicIsLoading, isError: getTopicIsError },
+  ] = useTopicApi("Get-All");
+  const [addTopicTrigger, { isLoading: addTopicIsLoading }] =
+    useTopicApi("Add-New");
+  const [editTopicTrigger, { isLoading: editTopicIsLoading }] =
+    useTopicApi("Edit");
+  const [deleteTopicTrigger] = useTopicApi("Delete");
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [topics, setTopics] = useState<Topics[] | null>(null);
+  // const [isLoading, setIsLoading] = useState(false);
+
+  const [topicsData, setTopicsData] = useState<{
+    topics: Topics[];
+    meta: any;
+  } | null>(null);
+
   const [isCurrentlyEditingTopic, setIsCurrentlyEditingTopic] =
     useState<IsCurrentlyEditingTopic>({ value: false, topic: null });
   const [name, setName] = useState("");
@@ -54,50 +56,36 @@ const TopicsPage = () => {
       name: name,
       description: description,
     });
-    setIsLoading(true);
+    // setIsLoading(true);
     try {
-      const res = await axios.post(BackendEndpoints.createTopic, payload, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const res: any = await addTopicTrigger(payload);
+
       toast.success(res?.data?.message);
       setName("");
       setDescription("");
       // refetch all topics
-      getAllTopics();
+      handleGetAllTopics();
     } catch (err: any) {
       console.log(err);
-      toast.error(
-        `${err?.response?.data?.message} ${err?.response?.data?.code}`
-      );
+      if (err?.response?.data?.errors[0]?.message)
+        toast.error(err?.response?.data?.errors[0]?.message);
+      else toast.error("Sorry an error occurred, try again later");
       setName("");
       setDescription("");
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const getAllTopics = useCallback(async () => {
-    // fetchs all topics from db
-    setIsLoading(true);
-    try {
-      // console.log("URL:::: ", BackendEndpoints.fetchTopics);
-      // console.log("ENV DOMAIN:::", process.env.REACT_APP_BACKEND_DOMAIN);
-      // console.log("ENV File:: ", process.env);
-      const res = await axios.get(BackendEndpoints.fetchTopics);
-      if (res.data?.success) {
-        setTopics(res.data.topics);
-      }
-    } catch (err: any) {
-      console.log(err);
-      toast.error(err.response?.data?.code);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const handleGetAllTopics = useCallback(
+    async (page = 1, limit = 50) => {
+      // fetchs all topics from db
+      getTopicTrigger({ page, limit }).then((res: any) => {
+        setTopicsData({ topics: res?.data?.topics, meta: res?.data?.meta });
+      });
+    },
+    [getTopicTrigger]
+  );
 
-  const editTopic = async () => {
+  const handleEditTopic = async () => {
     // edit a single topic in db
 
     // ignore edit if user didnt make any change
@@ -106,9 +94,11 @@ const TopicsPage = () => {
       description === isCurrentlyEditingTopic.topic.description;
 
     if (shouldIgnore) {
+      setName("");
+      setDescription("");
       return;
     }
-    setIsLoading(true);
+    // setIsLoading(true);
 
     try {
       const payload = JSON.stringify({
@@ -116,43 +106,38 @@ const TopicsPage = () => {
         description,
       });
 
-      const headers = {
-        "Content-Type": "application/json",
-      };
-      await axios.put(
-        BackendEndpoints.editTopic(isCurrentlyEditingTopic.topic!.id),
+      await editTopicTrigger({
         payload,
-        {
-          headers,
-        }
-      );
+        id: isCurrentlyEditingTopic.topic?.id,
+      });
       toast.success("Topic Edited Successfully");
       setName("");
       setDescription("");
 
-      // refetch topics
-      getAllTopics();
+      setIsCurrentlyEditingTopic({ value: false, topic: null });
+
+      // refetch all topics
+      handleGetAllTopics(Number(topicsData?.meta.current_page), 50);
     } catch (err: any) {
       toast.error(
         `${err?.response?.data?.message} ${err?.response?.data?.code}`
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 
-  const deleteTopic = async (topic: Topics) => {
+  const handleDeleteTopic = async (topic: Topics) => {
     // delete a single topic in db
-    setIsLoading(true);
     try {
-      const res = await axios.delete(BackendEndpoints.editTopic(topic.id));
-      console.log(res);
-    } catch (err:any) {
+      const res: any = await deleteTopicTrigger(topic.id);
+      toast.success(res?.data?.message);
+
+      //remove deleted item
+      const newArr = topicsData!?.topics.filter((item) => item.id !== topic.id);
+      setTopicsData({ meta: topicsData?.meta, topics: newArr });
+    } catch (err: any) {
       toast.error(
         `${err?.response?.data?.message} ${err?.response?.data?.code}`
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -163,6 +148,14 @@ const TopicsPage = () => {
     setDescription(topic.description);
   };
 
+  // handles pagination on page change
+  const handlePaginationOnchange = (
+    e: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    handleGetAllTopics(value);
+  };
+
   // routes a user to the topic tweet page when a topic is clicked
   const navigateToTopicTweets = (topic: Topics) => {
     navigate(`/topics/tweets/${topic.id}`, { state: topic });
@@ -170,8 +163,8 @@ const TopicsPage = () => {
 
   useEffect(() => {
     // on first render fetch all topics
-    getAllTopics();
-  }, [getAllTopics]);
+    handleGetAllTopics();
+  }, [handleGetAllTopics]);
 
   return (
     <div className="topic-wrapper">
@@ -206,17 +199,19 @@ const TopicsPage = () => {
               minHeight: "100px",
             }}
           />
-          {isLoading ? (
+          {addTopicIsLoading || editTopicIsLoading ? (
             <Typography
               component={"div"}
               sx={{ display: "flex", justifyContent: "flex-end" }}
             >
-              <LoadingIndicator isLoading={isLoading} size={20} />
+              <LoadingIndicator size={20} />
             </Typography>
           ) : (
             <Button
               onClick={() =>
-                isCurrentlyEditingTopic.value ? editTopic() : handleAddTopic()
+                isCurrentlyEditingTopic.value
+                  ? handleEditTopic()
+                  : handleAddTopic()
               }
               variant="contained"
               sx={{
@@ -237,10 +232,16 @@ const TopicsPage = () => {
               textAlign: "center",
             }}
           >
-            <LoadingIndicator isLoading={isLoading} />
+            {getTopicIsLoading ? (
+              <LoadingIndicator />
+            ) : getTopicIsError ? (
+              <p>An Error Ocurred While Fetching, Please try again later</p>
+            ) : (
+              <></>
+            )}
           </div>
           <div className="topic-table-wrapper">
-            {topics && topics.length > 0 ? (
+            {topicsData && topicsData.topics.length > 0 ? (
               <table className="topic-table" width={"100%"}>
                 <thead>
                   <tr>
@@ -252,9 +253,15 @@ const TopicsPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {topics?.map((topic, index) => (
+                  {topicsData?.topics?.map((topic, index) => (
                     <tr
-                      style={{ cursor: "pointer" }}
+                      style={{
+                        opacity:
+                          isCurrentlyEditingTopic.topic?.id === topic.id
+                            ? 0.4
+                            : 1,
+                      }}
+                      id={`topic-${topic.id}`}
                       key={`${index}-${topic.id}`}
                     >
                       <td onClick={() => navigateToTopicTweets(topic)}>
@@ -269,14 +276,14 @@ const TopicsPage = () => {
                       <td onClick={() => handleEditIconClick(topic)}>
                         <EditRounded sx={{ cursor: "pointer" }} />
                       </td>
-                      <td onClick={() => deleteTopic(topic)}>
+                      <td onClick={() => handleDeleteTopic(topic)}>
                         <DeleteRounded sx={{ cursor: "pointer" }} />{" "}
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-            ) : topics?.length === 0 ? (
+            ) : topicsData?.topics?.length === 0 ? (
               <p
                 style={{
                   textAlign: "center",
@@ -290,6 +297,16 @@ const TopicsPage = () => {
               <></>
             )}
           </div>
+          {/* PAGINATION */}
+          {topicsData?.meta?.last_page > 1 && (
+            <Pagination
+              color="primary"
+              count={topicsData?.meta?.last_page}
+              size="large"
+              onChange={handlePaginationOnchange}
+              sx={{ display: "flex", justifyContent: "center" }}
+            />
+          )}
         </section>
       </main>
     </div>
