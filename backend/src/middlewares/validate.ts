@@ -13,11 +13,13 @@ export const validate =
 
       next();
     } catch (err: any) {
+      console.log(err);
       if (err instanceof ZodError) {
         return res.status(400).json({
           success: false,
           message: "VALIDATION_FAILED",
           errors: err.errors,
+          code: "VALIDATION_FAILED",
         });
       }
 

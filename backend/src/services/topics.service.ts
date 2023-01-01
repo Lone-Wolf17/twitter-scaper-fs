@@ -1,24 +1,23 @@
 import {
   CreateTopicsBody,
-  GetByTopicIDParams,
   ListTopicParams,
   UpdateTopicBody,
 } from "../controllers/topics.dto";
 import { Prisma } from "@prisma/client";
 import prismaClient from "./database";
-import slugify from "slugify";
 import {
   FetchTweetsInput,
   SetBookmarkTweetInput,
   FetchBookmarkedTweetsInput,
 } from "../schemas/topics.schema";
+import { slugifyTopic } from "../utils";
 
 const createTopic = async (input: CreateTopicsBody) => {
   return await prismaClient.topic.create({
     data: {
       name: input.name,
       description: input.description,
-      slug: slugify(input.name, { replacement: "_" }),
+      slug: slugifyTopic(input.name),
     },
   });
 };
@@ -62,7 +61,8 @@ const fetchTweets = async ({
       gte: startTime ? new Date(startTime) : undefined,
     },
     text: {
-      search: query ? `${(query as string).split(" ").join(" & ")}` : undefined,
+      contains: query ? `${(query as string).split(" ").join("&")}` : undefined,
+      mode: "insensitive",
     },
     bookmarked: bookmarked ? Boolean(bookmarked) : undefined,
   };
@@ -75,7 +75,7 @@ const fetchTweets = async ({
       where: whereQuery,
       include: {
         tweeter: true,
-        topic: true
+        topic: true,
       },
       orderBy: { createdAt: orderBy as Prisma.SortOrder },
       take: result_per_page,
@@ -91,12 +91,26 @@ const updateTopic = async (
   id: string,
   { name, description }: UpdateTopicBody
 ) => {
+  const topic = await prismaClient.topic.findUniqueOrThrow({
+    where: { id },
+  });
+
+  // if slug is diff, its the same as creating a new topic.
+  //  so delete tweets that have been scapped for topic
+  // this ensures that tweets are not linked to the wrong topic
+  if (topic.slug != slugifyTopic(name)) {
+    await prismaClient.tweet.deleteMany({
+      where: {
+        topicId: topic.id,
+      },
+    });
+  }
   return await prismaClient.topic.update({
     where: { id },
     data: {
       name,
       description,
-      slug: slugify(name, { replacement: "_" }),
+      slug: slugifyTopic(name),
     },
   });
 };

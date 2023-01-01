@@ -1,3 +1,5 @@
+import slugify from "slugify";
+
 interface PaginationParams<T> {
   current_page?: number;
   limit?: number;
@@ -19,4 +21,14 @@ export function paginateResult<T>({
       next_page: current_page >= last_page ? null : Number(current_page) + 1,
     },
   };
+}
+
+export const slugifyTopic = (topic: string) =>
+  slugify(topic, { replacement: "_" });
+
+interface BackendErrorTemplate {
+  code: string;
+  message: string;
+  status: boolean;
+  errors?: any;
 }
