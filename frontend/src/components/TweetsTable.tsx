@@ -10,7 +10,7 @@ import { Tweet, TweetData } from "../types/tweet.dto";
 
 import { Topics } from "../types/topic.dto";
 
-import "../styles/tweetTable.css";
+import "../styles/tweetsTable.css";
 
 import useTweetApi from "../api-hooks/useTweetApi";
 
@@ -48,6 +48,8 @@ function TweetsTable({
     try {
       const res: any = await setTweetBookmarkStatusTrigger(bodyData);
 
+      // console.log(res);
+
       toast.success(
         `Tweet ${status ? "" : "removed from "}bookmarked successfully`
       );
@@ -61,8 +63,7 @@ function TweetsTable({
         tweetsData?.tweets.splice(index, 1);
       } else {
         tweetsData!.tweets![index] = {
-          ...res?.data?.topic,
-          tweeter: tweet?.tweeter,
+          ...res?.data.tweet,
         };
       }
     } catch (err: any) {
@@ -97,19 +98,27 @@ function TweetsTable({
           <table className="tweet-table" width={"100%"}>
             <thead>
               <tr>
-                <th>Bookmark</th>
+                <th>Date</th>
 
                 <th>Topic</th>
 
                 <th>Tweep Handler</th>
 
                 <th>Tweet</th>
+
+                <th>Bookmark</th>
               </tr>
             </thead>
 
             <tbody>
               {tweetsData.tweets?.map((tweet, index) => (
                 <tr key={`${index}-${tweet.tweetId}`}>
+                  <td>{new Date(tweet?.createdAt).toLocaleString("en-uk", {hour12: true})}</td>
+                  <td>{tweet?.topic.name}</td>
+
+                  <td>{`@${tweet?.tweeter?.username}`}</td>
+
+                  <td>{tweet?.text}</td>
                   <td>
                     {tweet.bookmarked ? (
                       <Bookmark
@@ -121,12 +130,6 @@ function TweetsTable({
                       />
                     )}
                   </td>
-
-                  <td>{tweet?.topic.name}</td>
-
-                  <td>{`@${tweet?.tweeter?.username}`}</td>
-
-                  <td>{tweet?.text}</td>
                 </tr>
               ))}
             </tbody>
@@ -148,7 +151,7 @@ function TweetsTable({
 
       {/* PAGINATION */}
 
-      {tweetsData && tweetsData?.meta?.last_page > 1 && !isError && (
+      {tweetsData && tweetsData?.tweets.length > 0 && !isError && (
         <Pagination
           color="primary"
           count={Math.ceil(tweetsData.meta.last_page)}

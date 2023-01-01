@@ -83,6 +83,12 @@ const TopicsPage = () => {
     [getTopicTrigger]
   );
 
+  const handleResetEditing = () => {
+    setName("");
+    setDescription("");
+    setIsCurrentlyEditingTopic({ value: false, topic: null });
+  };
+
   const handleEditTopic = async () => {
     // edit a single topic in db
 
@@ -92,8 +98,7 @@ const TopicsPage = () => {
       description === isCurrentlyEditingTopic.topic.description;
 
     if (shouldIgnore) {
-      setName("");
-      setDescription("");
+      handleResetEditing();
       return;
     }
     // setIsLoading(true);
@@ -109,10 +114,7 @@ const TopicsPage = () => {
         id: isCurrentlyEditingTopic.topic?.id,
       });
       toast.success("Topic Edited Successfully");
-      setName("");
-      setDescription("");
-
-      setIsCurrentlyEditingTopic({ value: false, topic: null });
+      handleResetEditing();
 
       // refetch all topics
       handleGetAllTopics(Number(topicsData?.meta.current_page), 50);
@@ -195,6 +197,8 @@ const TopicsPage = () => {
               minWidth: "100%",
               maxHeight: "400px",
               minHeight: "100px",
+              padding: "15px",
+              boxSizing: "border-box",
             }}
           />
           {addTopicIsLoading || editTopicIsLoading ? (
@@ -205,21 +209,41 @@ const TopicsPage = () => {
               <LoadingIndicator size={20} />
             </Typography>
           ) : (
-            <Button
-              onClick={() =>
-                isCurrentlyEditingTopic.value
-                  ? handleEditTopic()
-                  : handleAddTopic()
-              }
-              variant="contained"
-              sx={{
-                width: "fit-content",
-                padding: ".2em 3em",
+            <div
+              style={{
                 alignSelf: "flex-end",
               }}
             >
-              {isCurrentlyEditingTopic.value ? "Edit" : "Add"}
-            </Button>
+              <Button
+                onClick={() =>
+                  isCurrentlyEditingTopic.value
+                    ? handleEditTopic()
+                    : handleAddTopic()
+                }
+                variant="contained"
+                sx={{
+                  width: "fit-content",
+                  padding: ".2em 3em",
+                  alignSelf: "flex-end",
+                }}
+              >
+                {isCurrentlyEditingTopic.value ? "Edit" : "Add"}
+              </Button>
+              {isCurrentlyEditingTopic.value && (
+                <Button
+                  onClick={() => handleResetEditing()}
+                  variant="contained"
+                  sx={{
+                    width: "fit-content",
+                    padding: ".2em 3em",
+                    alignSelf: "flex-end",
+                    marginLeft: "10px",
+                  }}
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
           )}
         </section>
         {/* SECTION 2 (Topics Table) */}
@@ -255,6 +279,7 @@ const TopicsPage = () => {
                     <tr
                       style={{
                         opacity:
+                          isCurrentlyEditingTopic.value &&
                           isCurrentlyEditingTopic.topic?.id === topic.id
                             ? 0.4
                             : 1,
@@ -263,7 +288,9 @@ const TopicsPage = () => {
                       key={`${index}-${topic.id}`}
                     >
                       <td onClick={() => navigateToTopicTweets(topic)}>
-                        {new Date(topic.createdAt).toLocaleString()}
+                        {new Date(topic.createdAt).toLocaleString("en-uk", {
+                          hour12: true,
+                        })}
                       </td>
                       <td onClick={() => navigateToTopicTweets(topic)}>
                         {topic.name}

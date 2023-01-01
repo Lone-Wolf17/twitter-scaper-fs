@@ -33,7 +33,7 @@ function TopicApi(routeType: routeType): returnValue {
 
       return new Promise((resolve, reject) => {
         axiosInstance
-          .get(`/topics/all??page=${page}&limit=${limit}`)
+          .get(`/topics/all?page=${page}&limit=${limit}`)
           .then((res) => {
             onSuccess();
 
@@ -55,17 +55,14 @@ function TopicApi(routeType: routeType): returnValue {
 
       return new Promise((resolve, reject) => {
         axiosInstance
-
           .post("/topics/create", bodyData, {
             headers: { "Content-Type": "application/json" },
           })
-
           .then((res) => {
             onSuccess();
 
             resolve(res);
           })
-
           .catch((err) => {
             onFailure(err);
 
@@ -78,20 +75,23 @@ function TopicApi(routeType: routeType): returnValue {
 
   const editTopic = useCallback(
     ({
-      bodyData,
+      payload,
       id,
     }: {
-      bodyData: Pick<Topics, "name" | "description">;
+      payload: Pick<Topics, "name" | "description">;
       id: string;
     }) => {
       setIsLoading(true);
 
       return new Promise((resolve, reject) => {
         axiosInstance
-
-          .put(`/topics/${id}`, bodyData, {
-            headers: { "Content-Type": "application/json" },
-          })
+          .put(
+            `/topics/${id}`,
+            payload,
+            {
+              headers: { "Content-Type": "application/json" },
+            }
+          )
 
           .then((res) => {
             onSuccess();
@@ -100,6 +100,7 @@ function TopicApi(routeType: routeType): returnValue {
           })
 
           .catch((err) => {
+            console.log("Axios Error: ", err);
             onFailure(err);
 
             reject(err);

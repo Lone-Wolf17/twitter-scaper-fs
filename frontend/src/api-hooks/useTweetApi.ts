@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { returnValue } from "../types/topic.dto";
-import { routeType } from "../types/tweet.dto";
+import { GetTweetFilters, routeType } from "../types/tweet.dto";
 import axiosInstance from "../utils/axios-utils";
 
 function TweetApi(routeType: routeType): returnValue {
@@ -19,13 +19,25 @@ function TweetApi(routeType: routeType): returnValue {
     setIsLoading(false);
     setIsError(true);
   }, []);
+
   const getTopicTweets = useCallback(
-    (urlParams: string) => {
+    (filter: GetTweetFilters) => {
       setIsLoading(true);
+
+      const filterParams = { ...filter };
+      // remove invalid params
+      if (!filterParams.startTime) delete filterParams.startTime;
+      if (!filterParams.endTime) delete filterParams.endTime;
+      if (!filterParams.query) delete filterParams.query;
+      if (!filterParams.bookmarked) delete filterParams.bookmarked;
+
+      const params = Object.entries(filterParams);
+      const searchParams = new URLSearchParams(params);
+
       return new Promise((resolve, reject) => {
         const headers = { "Content-Type": "application/json" };
         axiosInstance
-          .get(`/topics/tweets?${urlParams}`, { headers })
+          .get(`/topics/tweets?${searchParams}`, { headers })
           .then((res: any) => {
             onSuccess();
             resolve(res);

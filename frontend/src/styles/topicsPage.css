@@ -20,10 +20,9 @@
 }
 
 .topic-table tr {
-    transition: all 500ms ease-in-out;
-    cursor: pointer;
+  transition: all 500ms ease-in-out;
+  cursor: pointer;
 }
-
 
 .topic-table td {
   max-width: 300px;

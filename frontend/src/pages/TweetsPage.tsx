@@ -5,21 +5,17 @@ import React, {
   ChangeEvent,
   useMemo,
 } from "react";
-import { useParams} from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { SearchRounded } from "@mui/icons-material";
 import Button from "@mui/material/Button";
-import { LocalizationProvider } from "@mui/x-date-pickers";
 import {
   FormControl,
   InputLabel,
   MenuItem,
   Select,
   SelectChangeEvent,
-  TextField,
 } from "@mui/material";
-import { AdapterLuxon } from "@mui/x-date-pickers/AdapterLuxon";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import { DateTime } from "luxon";
 
 import Header from "../components/Header";
@@ -27,39 +23,29 @@ import "../styles/tweetsPage.css";
 import { GetTweetFilters, TweetData } from "../types/tweet.dto";
 import useTweetApi from "../api-hooks/useTweetApi";
 import TweetsTable from "../components/TweetsTable";
+import CustomDatePicker from "../components/CustomDatePicker";
 
 type OrderByType = "asc" | "desc";
 
 const TweetsPage = () => {
-  const { id = "" } = useParams();
-  
+  const { id } = useParams();
+
   const [getTweetsTrigger, { isLoading: getTweetIsLoading, isError }] =
     useTweetApi("Get-All");
-  
+
   // States
   const [tweetsData, setTweetsData] = useState<TweetData | null>(null);
   const [searchInput, setSearchInput] = useState("");
 
-  const [startTime, setStartTime] = useState<DateTime | null>(null);
-  const [endTime, setEndTime] = useState<DateTime | null>(null);
+  const [startDate, setStartTime] = useState<DateTime | null>(null);
+  const [endDate, setEndTime] = useState<DateTime | null>(null);
   const [orderBy, setOrderBy] = useState<OrderByType>("desc");
 
   // Gets all the tweets
   const getTopicTweets = useCallback(
     async (filter: GetTweetFilters) => {
-      const filterParams = { ...filter };
-      // remove invalid params
-      if (!filterParams.startTime) delete filterParams.startTime;
-      if (!filterParams.endTime) delete filterParams.endTime;
-      if (!filterParams.query) delete filterParams.query;
-      if (!filterParams.bookmarked) delete filterParams.bookmarked;
-
-      const params = Object.entries(filterParams);
-      const searchParams = new URLSearchParams(params.toString());
-
-      // setIsLoading(true);
       try {
-        const res: any = await getTweetsTrigger(searchParams);
+        const res: any = await getTweetsTrigger(filter);
         setTweetsData(res?.data);
 
         // scroll page to top
@@ -103,15 +89,15 @@ const TweetsPage = () => {
       setSearchInput(e.target.value);
       debouncedSearchFunc({
         topicID: id,
-        startTime: startTime ? startTime.toISODate() : "",
-        endTime: endTime ? endTime.toISODate() : "",
+        startTime: startDate ? startDate.toISODate() : "",
+        endTime: endDate ? endDate.toISODate() : "",
         orderBy: orderBy,
         query: e.target.value.trim(),
         limit: "20",
         page: "1",
       });
     },
-    [debouncedSearchFunc, endTime, id, orderBy, startTime]
+    [debouncedSearchFunc, endDate, id, orderBy, startDate]
   );
 
   // handles pagination on page change
@@ -121,8 +107,8 @@ const TweetsPage = () => {
   ) => {
     getTopicTweets({
       topicID: id,
-      startTime: startTime ? startTime.toISODate() : "",
-      endTime: endTime ? endTime.toISODate() : "",
+      startTime: startDate ? startDate.toISODate() : "",
+      endTime: endDate ? endDate.toISODate() : "",
       orderBy: orderBy,
       query: searchInput.trim(),
       limit: "20",
@@ -138,102 +124,126 @@ const TweetsPage = () => {
     });
   }, [getTopicTweets, id]);
 
-   return (
-     <div className="tweets-wrapper">
-       <Header />
-       <main>
-         {/* SECTION 1 (SEARCH) */}
-         <section className="tweets-sec1">
-           <div className="tweets-searchBar">
-             <SearchRounded />
-             <input
-               onChange={searchInputOnChange}
-               value={searchInput}
-               type="text"
-             />
-           </div>
-         </section>
-         <section className="tweets-sec2">
-           <LocalizationProvider dateAdapter={AdapterLuxon}>
-             <DesktopDatePicker
-               label="Start Time"
-               value={startTime}
-               disableMaskedInput
-               onChange={startTimeOnChange}
-               renderInput={(params) => <TextField {...params} />}
-             />
-           </LocalizationProvider>
-           <LocalizationProvider dateAdapter={AdapterLuxon}>
-             <DesktopDatePicker
-               label="End Time"
-               value={endTime}
-               disableMaskedInput
-               onChange={endTimeOnChange}
-               renderInput={(params) => <TextField {...params} />}
-             />
-           </LocalizationProvider>
-           <FormControl fullWidth>
-             <InputLabel id="orderLabelById">Order By</InputLabel>
-             <Select
-               labelId="orderLabelById"
-               id="demo-simple-select"
-               value={orderBy}
-               label="Order By"
-               onChange={orderByOnChange}
-             >
-               <MenuItem value={"asc"}>Ascending</MenuItem>
-               <MenuItem value={"desc"}>Decending</MenuItem>
-             </Select>
-           </FormControl>
-           <Button
-             sx={{ alignSelf: "center" }}
-             disabled={getTweetIsLoading}
-             onClick={() => {
-               getTopicTweets({
-                 topicID: id,
-                 startTime: startTime ? startTime.toISODate() : "",
-                 endTime: endTime ? endTime.toISODate() : "",
-                 orderBy: orderBy,
-                 query: searchInput.trim(),
-                 limit: "20",
-                 page: "1",
-               });
-             }}
-             variant="contained"
-           >
-             Filter
-           </Button>
-           <Button
-             sx={{ alignSelf: "center" }}
-             disabled={getTweetIsLoading}
-             onClick={() => {
-               getTopicTweets({
-                 topicID: id,
-                 limit: "20",
-                 page: "1",
-               });
-               setStartTime(null);
-               setEndTime(null);
-               setSearchInput("");
-             }}
-             variant="contained"
-           >
-             Reset
-           </Button>
-         </section>
-         {/* SECTION 3 (TABLE) */}
-         <section>
-           <TweetsTable
-             isLoading={getTweetIsLoading}
-             isError={isError}
-             parentComponent={"Topic-Tweets"}
-             tweetsData={tweetsData}
-             paginationOnchange={handlePaginationOnChange}
-           />
-         </section>
-       </main>
-     </div>
-   );
+  return (
+    <div className="tweets-wrapper">
+      <Header />
+      <main>
+        {/* SECTION 1 (SEARCH) */}
+        <section className="tweets-sec1">
+          <div className="tweets-searchBar">
+            <SearchRounded />
+            <input
+              onChange={searchInputOnChange}
+              value={searchInput}
+              type="text"
+            />
+          </div>
+        </section>
+        <section className="tweets-sec2">
+          {/* <LocalizationProvider dateAdapter={AdapterLuxon}>
+            <DesktopDatePicker
+              label="Start Date"
+              value={startDate}
+              disableMaskedInput
+              onChange={startTimeOnChange}
+              renderInput={(params) => <TextField {...params} />}
+            />
+          </LocalizationProvider> */}
+          {/* <LocalizationProvider dateAdapter={AdapterLuxon}>
+            <DesktopDatePicker
+              value={endTime}
+              disableMaskedInput
+              onChange={endTimeOnChange}
+              renderInput={(params) => {
+                console.log("Picker Params:: ", params);
+                return (
+                  <TextField
+                    {...params}
+                    inputProps={{
+                      readOnly: true,
+                      placeholder: "End Date",
+                    }}
+                    InputProps={{
+                      ...params.InputProps,
+                      className: "Mui-disabled",
+                    }}
+                  />
+                );
+              }}
+            />
+          </LocalizationProvider> */}
+          <CustomDatePicker
+            initialValue={startDate}
+            label="Start Date"
+            onChange={startTimeOnChange}
+          />
+          <CustomDatePicker
+            initialValue={endDate}
+            label="End Date"
+            onChange={endTimeOnChange}
+          />
+          <FormControl fullWidth>
+            <InputLabel id="orderLabelById">Order By</InputLabel>
+            <Select
+              labelId="orderLabelById"
+              id="demo-simple-select"
+              value={orderBy}
+              label="Order By"
+              onChange={orderByOnChange}
+            >
+              <MenuItem value={"asc"}>Ascending</MenuItem>
+              <MenuItem value={"desc"}>Decending</MenuItem>
+            </Select>
+          </FormControl>
+          <Button
+            sx={{ alignSelf: "center" }}
+            disabled={getTweetIsLoading}
+            onClick={() => {
+              getTopicTweets({
+                topicID: id,
+                startTime: startDate ? startDate.toISODate() : "",
+                endTime: endDate ? endDate.toISODate() : "",
+                orderBy: orderBy,
+                query: searchInput.trim(),
+                limit: "20",
+                page: "1",
+              });
+            }}
+            variant="contained"
+          >
+            Filter
+          </Button>
+          <Button
+            sx={{ alignSelf: "center" }}
+            disabled={getTweetIsLoading}
+            onClick={() => {
+              getTopicTweets({
+                topicID: id,
+                limit: "20",
+                page: "1",
+              });
+              setStartTime(null);
+              setEndTime(null);
+              setSearchInput("");
+            }}
+            variant="contained"
+          >
+            Reset
+          </Button>
+        </section>
+        {/* SECTION 3 (TABLE) */}
+        <section>
+          <TweetsTable
+            isLoading={getTweetIsLoading}
+            isError={isError}
+            parentComponent={"Topic-Tweets"}
+            tweetsData={tweetsData}
+            paginationOnchange={handlePaginationOnChange}
+          />
+        </section>
+      </main>
+    </div>
+  );
 };
 
 export default TweetsPage;
