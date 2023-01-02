@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd backend
+# cd backend
 npx prisma generate
 npx prisma migrate dev
 yarn build

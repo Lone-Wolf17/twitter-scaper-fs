@@ -35,21 +35,4 @@ Once that is setup, open a terminal and run
 docker compose up
 ```
 
-This will handle creating postgres db container, building the backend, connecting the backend to the database and run all migrations.
-
-Once you see the message "Listening on PORT=8080
-Successfully started worker for tweet scraper every 15 seconds"
-
-the backend is ready.
-
-cd into the frontend directory on your terminal
-
-```
-cd frontend
-```
-
-and start the frontend using
-
-```
-npm start
-```
+This will handle creating creating the backend container, frontend container and postgres database for the backend. 

@@ -2,7 +2,8 @@ version: "3.8"
 services:
   backend:
     build:
-      context: .
+      context: "./backend"
+      dockerfile: Dockerfile
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     environment:
@@ -17,14 +18,33 @@ services:
       - "PORT=${BACKEND_PORT}"
     restart: unless-stopped
     volumes:
-      - .:/app/
-      - /app/backend/node_modules
+      - ./backend:/app
+      - /app/node_modules
     depends_on:
       - postgres
     links:
       - postgres
     networks:
+      - database_network
+      - web_network
+
+  frontend:
+    build:
+      context: "./frontend"
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
       - backend
+    links:
+      - backend
+    networks:
+      - web_network
+
   postgres:
     image: postgres:14.6
     container_name: postgres
@@ -37,8 +57,10 @@ services:
     ports:
       - "5433:5432"
     networks:
-      - backend
+      - database_network
+
 volumes:
   postgres:
 networks:
-  backend:
+  database_network:
+  web_network:
