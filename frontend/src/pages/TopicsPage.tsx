@@ -63,6 +63,9 @@ const TopicsPage = () => {
       setDescription("");
       // refetch all topics
       handleGetAllTopics();
+      // console.log(res?.data);
+      // const newTopic = res?.data?.topic;
+      // const newArr = topicsData!?.topics.push(newTopic);
     } catch (err: any) {
       console.log(err);
       if (err?.response?.data?.errors[0]?.message)
@@ -76,9 +79,9 @@ const TopicsPage = () => {
   const handleGetAllTopics = useCallback(
     async (page = 1, limit = 50) => {
       // fetchs all topics from db
-      getTopicTrigger({ page, limit }).then((res: any) => {
-        setTopicsData({ topics: res?.data?.topics, meta: res?.data?.meta });
-      });
+      const res: any = await getTopicTrigger({ page, limit });
+
+      setTopicsData({ topics: res?.data?.topics, meta: res?.data?.meta });
     },
     [getTopicTrigger]
   );
@@ -109,15 +112,23 @@ const TopicsPage = () => {
         description,
       });
 
-      await editTopicTrigger({
+      const res: any = await editTopicTrigger({
         payload,
         id: isCurrentlyEditingTopic.topic?.id,
       });
       toast.success("Topic Edited Successfully");
-      handleResetEditing();
 
-      // refetch all topics
-      handleGetAllTopics(Number(topicsData?.meta.current_page), 50);
+      console.log(res?.data);
+
+      // Update topicsData array
+      const index = topicsData?.topics.findIndex(
+        (element) => element.id === isCurrentlyEditingTopic.topic!.id
+      )!;
+      topicsData!.topics![index] = {
+        ...res?.data.topic,
+      };
+      setTopicsData({ meta: topicsData?.meta, topics: topicsData!.topics! });
+      handleResetEditing();
     } catch (err: any) {
       toast.error(
         `${err?.response?.data?.message} ${err?.response?.data?.code}`
@@ -215,6 +226,7 @@ const TopicsPage = () => {
               }}
             >
               <Button
+                data-testid={"addNewTopicBtn"}
                 onClick={() =>
                   isCurrentlyEditingTopic.value
                     ? handleEditTopic()
@@ -277,6 +289,7 @@ const TopicsPage = () => {
                 <tbody>
                   {topicsData?.topics?.map((topic, index) => (
                     <tr
+                      data-testid={"tableItems"}
                       style={{
                         opacity:
                           isCurrentlyEditingTopic.value &&
@@ -292,16 +305,28 @@ const TopicsPage = () => {
                           hour12: true,
                         })}
                       </td>
-                      <td onClick={() => navigateToTopicTweets(topic)}>
+                      <td
+                        data-testid={`tableItemName-${topic.id}`}
+                        onClick={() => navigateToTopicTweets(topic)}
+                      >
                         {topic.name}
                       </td>
-                      <td onClick={() => navigateToTopicTweets(topic)}>
+                      <td
+                        data-testid={`tableItemDesc-${topic.id}`}
+                        onClick={() => navigateToTopicTweets(topic)}
+                      >
                         {topic.description}
                       </td>
-                      <td onClick={() => handleEditIconClick(topic)}>
+                      <td
+                        data-testid={`editTableItemBtn-${topic.id}`}
+                        onClick={() => handleEditIconClick(topic)}
+                      >
                         <EditRounded sx={{ cursor: "pointer" }} />
                       </td>
-                      <td onClick={() => handleDeleteTopic(topic)}>
+                      <td
+                        data-testid={`deleteTableItemBtn-${topic.id}`}
+                        onClick={() => handleDeleteTopic(topic)}
+                      >
                         <DeleteRounded sx={{ cursor: "pointer" }} />{" "}
                       </td>
                     </tr>

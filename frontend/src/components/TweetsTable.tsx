@@ -15,8 +15,9 @@ import "../styles/tweetsTable.css";
 import useTweetApi from "../api-hooks/useTweetApi";
 
 import { toast } from "react-toastify";
+import { response } from "msw";
 
-interface propType {
+export interface TweetsTablePropType {
   tweetsData: TweetData | null;
 
   isLoading: boolean;
@@ -35,7 +36,7 @@ function TweetsTable({
   isError,
   parentComponent,
   paginationOnchange,
-}: propType) {
+}: TweetsTablePropType) {
   const [setTweetBookmarkStatusTrigger] = useTweetApi("Set-Bookmark");
 
   const bookmarkIconClick = async (tweet: Tweet, status: boolean) => {
@@ -62,11 +63,14 @@ function TweetsTable({
         // Removed from list
         tweetsData?.tweets.splice(index, 1);
       } else {
+        console.log(res?.data.tweet);
         tweetsData!.tweets![index] = {
           ...res?.data.tweet,
         };
+        console.log(tweetsData!.tweets![index]);
       }
     } catch (err: any) {
+      console.log(err);
       if (err.response.status === 500 || !err.response?.data?.code) {
         toast.error("Oops An error occurred ");
       } else {
@@ -112,9 +116,16 @@ function TweetsTable({
 
             <tbody>
               {tweetsData.tweets?.map((tweet, index) => (
-                <tr key={`${index}-${tweet.tweetId}`}>
-                  <td>{new Date(tweet?.createdAt).toLocaleString("en-uk", {hour12: true})}</td>
-                  <td>{tweet?.topic.name}</td>
+                <tr
+                  data-testid="tweetTableItems"
+                  key={`${index}-${tweet.tweetId}`}
+                >
+                  <td>
+                    {new Date(tweet?.createdAt).toLocaleString("en-uk", {
+                      hour12: true,
+                    })}
+                  </td>
+                  <td>{tweet?.topic?.name}</td>
 
                   <td>{`@${tweet?.tweeter?.username}`}</td>
 
@@ -122,10 +133,12 @@ function TweetsTable({
                   <td>
                     {tweet.bookmarked ? (
                       <Bookmark
+                        data-testid={`unBookmarkIcon-${tweet.tweetId}`}
                         onClick={() => bookmarkIconClick(tweet, false)}
                       />
                     ) : (
                       <BookmarkBorder
+                        data-testid={`bookmarkIcon-${tweet.tweetId}`}
                         onClick={() => bookmarkIconClick(tweet, true)}
                       />
                     )}

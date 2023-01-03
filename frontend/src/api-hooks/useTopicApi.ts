@@ -31,19 +31,20 @@ function TopicApi(routeType: routeType): returnValue {
     ({ page, limit }: { page: number; limit: number }) => {
       setIsLoading(true);
 
-      return new Promise((resolve, reject) => {
-        axiosInstance
-          .get(`/topics/all?page=${page}&limit=${limit}`)
-          .then((res) => {
-            onSuccess();
+      return new Promise(async (resolve, reject) => {
+        try {
+          const res = axiosInstance.get(
+            `/topics/all?page=${page}&limit=${limit}`
+          );
 
-            resolve(res);
-          })
-          .catch((err) => {
-            onFailure(err);
+          onSuccess();
 
-            reject(err);
-          });
+          resolve(res);
+        } catch (err) {
+          onFailure(err);
+
+          reject(err);
+        }
       });
     },
     [onFailure, onSuccess]
@@ -53,21 +54,17 @@ function TopicApi(routeType: routeType): returnValue {
     (bodyData: Pick<Topics, "name" | "description">) => {
       setIsLoading(true);
 
-      return new Promise((resolve, reject) => {
-        axiosInstance
-          .post("/topics/create", bodyData, {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const res = await axiosInstance.post("/topics/create", bodyData, {
             headers: { "Content-Type": "application/json" },
-          })
-          .then((res) => {
-            onSuccess();
-
-            resolve(res);
-          })
-          .catch((err) => {
-            onFailure(err);
-
-            reject(err);
           });
+          onSuccess();
+          resolve(res);
+        } catch (err) {
+          onFailure(err);
+          reject(err);
+        }
       });
     },
     [onFailure, onSuccess]
@@ -83,28 +80,17 @@ function TopicApi(routeType: routeType): returnValue {
     }) => {
       setIsLoading(true);
 
-      return new Promise((resolve, reject) => {
-        axiosInstance
-          .put(
-            `/topics/${id}`,
-            payload,
-            {
-              headers: { "Content-Type": "application/json" },
-            }
-          )
-
-          .then((res) => {
-            onSuccess();
-
-            resolve(res);
-          })
-
-          .catch((err) => {
-            console.log("Axios Error: ", err);
-            onFailure(err);
-
-            reject(err);
+      return new Promise(async (resolve, reject) => {
+        try {
+          const res = await axiosInstance.put(`/topics/${id}`, payload, {
+            headers: { "Content-Type": "application/json" },
           });
+          onSuccess();
+          resolve(res);
+        } catch (err) {
+          onFailure(err);
+          reject(err);
+        }
       });
     },
     [onFailure, onSuccess]
@@ -114,22 +100,15 @@ function TopicApi(routeType: routeType): returnValue {
     (id: string) => {
       setIsLoading(true);
 
-      return new Promise((resolve, reject) => {
-        axiosInstance
-
-          .delete(`/topics/${id}`)
-
-          .then((res) => {
-            onSuccess();
-
-            resolve(res);
-          })
-
-          .catch((err) => {
-            onFailure(err);
-
-            reject(err);
-          });
+      return new Promise(async (resolve, reject) => {
+        try {
+          const res = await axiosInstance.delete(`/topics/${id}`);
+          onSuccess();
+          resolve(res);
+        } catch (err) {
+          onFailure(err);
+          reject(err);
+        }
       });
     },
     [onFailure, onSuccess]

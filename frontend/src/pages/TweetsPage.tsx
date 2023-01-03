@@ -133,13 +133,14 @@ const TweetsPage = () => {
           <div className="tweets-searchBar">
             <SearchRounded />
             <input
+              role={"searchbox"}
               onChange={searchInputOnChange}
               value={searchInput}
               type="text"
             />
           </div>
         </section>
-        <section className="tweets-sec2">
+        <section className="tweets-sec2" style={{ pointerEvents: "auto" }}>
           {/* <LocalizationProvider dateAdapter={AdapterLuxon}>
             <DesktopDatePicker
               label="Start Date"
@@ -189,6 +190,7 @@ const TweetsPage = () => {
               id="demo-simple-select"
               value={orderBy}
               label="Order By"
+              inputProps={{ "data-testid": "orderBySelectBox" }}
               onChange={orderByOnChange}
             >
               <MenuItem value={"asc"}>Ascending</MenuItem>
@@ -196,7 +198,8 @@ const TweetsPage = () => {
             </Select>
           </FormControl>
           <Button
-            sx={{ alignSelf: "center" }}
+            data-testid="filterBtn"
+            sx={{ alignSelf: "center", pointerEvents: "auto" }}
             disabled={getTweetIsLoading}
             onClick={() => {
               getTopicTweets({
@@ -214,8 +217,9 @@ const TweetsPage = () => {
             Filter
           </Button>
           <Button
-            sx={{ alignSelf: "center" }}
-            disabled={getTweetIsLoading}
+            data-testid="resetBtn"
+            sx={{ alignSelf: "center", pointerEvents: "auto" }}
+            // disabled={getTweetIsLoading}
             onClick={() => {
               getTopicTweets({
                 topicID: id,
@@ -225,6 +229,7 @@ const TweetsPage = () => {
               setStartTime(null);
               setEndTime(null);
               setSearchInput("");
+              setOrderBy("desc");
             }}
             variant="contained"
           >

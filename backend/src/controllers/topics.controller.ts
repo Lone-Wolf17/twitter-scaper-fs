@@ -21,9 +21,10 @@ export const createTopic = async (
   response: Response
 ) => {
   try {
-    await TopicsService.createTopic(request.body);
+    const topic = await TopicsService.createTopic(request.body);
     response.status(200).json({
       success: true,
+      topic,
       message: "Topic created successfully",
     });
   } catch (error: any) {
@@ -69,9 +70,13 @@ export const updateTopic = async (
   response: Response
 ) => {
   try {
-    await TopicsService.updateTopic(request.params.id, request.body);
+    const topic = await TopicsService.updateTopic(
+      request.params.id,
+      request.body
+    );
     response.status(200).json({
       success: true,
+      topic,
       message: "Topic updated successfully",
     });
   } catch (error) {

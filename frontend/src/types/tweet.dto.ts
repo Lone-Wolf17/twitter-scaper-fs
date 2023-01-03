@@ -9,11 +9,13 @@ interface Tweet {
   updatedAt: string;
   bookmarked: boolean;
   tweeterId: string;
-  tweeter: {
-    id: string;
-    name: string;
-    username: string;
-  };
+  tweeter: Tweeter;
+}
+
+interface Tweeter {
+  id: string;
+  name: string;
+  username: string;
 }
 
 interface TweetData {
@@ -36,4 +38,4 @@ type GetTweetFilters = {
 
 type routeType = "Get-All" | "Get-Bookmarked" | "Set-Bookmark";
 
-export type { GetTweetFilters, Tweet, TweetData, routeType };
+export type { GetTweetFilters, Tweet, TweetData, routeType, Tweeter };

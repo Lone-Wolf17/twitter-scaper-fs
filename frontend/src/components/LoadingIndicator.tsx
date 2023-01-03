@@ -8,7 +8,13 @@ interface LoadingIndicatorProps {
 const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
   size,
 }) => {
-  return <CircularProgress color="primary" size={size} />;
+  return (
+    <CircularProgress
+      color="primary"
+      size={size}
+      data-testid={"loadingSpinner"}
+    />
+  );
 };
 
 export default LoadingIndicator;
